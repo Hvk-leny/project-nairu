@@ -163,6 +163,6 @@ try:
             # La réponse textuelle de Gemini est disponible dans : response.text
             # Tu peux l'afficher avec st.write(response.text) ou l'ajouter à ton historique
             
-        except Exception as e:
+except Exception as e:
             st.error(f"Erreur Gemini : {e}")
         # ----------------------
