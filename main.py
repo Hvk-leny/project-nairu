@@ -159,5 +159,5 @@ if 'prompt' in locals() and prompt:
          st.error(f"Erreur Gemini : {e}")
     
 
-    st.error(f"Erreur Gemini : {e}")
+    
         # ----------------------
