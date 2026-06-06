@@ -148,21 +148,16 @@ elif option == "Option Passionné / Intéressé 🔥":
     model_name = "gemini-1.5-flash"
 # ----------------------------------------
 # --- APPEL À GEMINI ---
-if prompt:
-try:
-    # On prépare le modèle Gemini avec le comportement choisi
-    model = genai.GenerativeModel(
-        model_name=model_name,
-        system_instruction=system_instruction
-    )
-            
-    # On envoie le message de l'utilisateur à Gemini
-    # (Remplace 'user_input' par le nom de ta variable si besoin)
-    response = model.generate_content(prompt)
-            
-            # La réponse textuelle de Gemini est disponible dans : response.text
-            # Tu peux l'afficher avec st.write(response.text) ou l'ajouter à ton historique
-            
-except Exception as e:
+if 'prompt' in locals() and prompt:
+     try:
+         model = genai.GenerativeModel(
+             model_name=model_name,
+             system_instruction=system_instruction
+         )
+         response = model.generate_content(prompt)
+     except Exception as e:
+         st.error(f"Erreur Gemini : {e}")
+    
+
     st.error(f"Erreur Gemini : {e}")
         # ----------------------
