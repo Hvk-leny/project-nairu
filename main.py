@@ -121,6 +121,7 @@ else:
             sauvegarder_base(st.session_state.data)
 # --- CONFIGURATION GEMINI ET INTERFACE ---
 # Activation de ta clé API Gemini
+import google.generativeai as genai
 genai.configure(api_key="AQ.Ab8RN6KqmDWeAQNop2WUxrlaTUvgIROB9Bh8kjX-UwT1dJRS7w")
 
 # Création du menu dans la barre latérale
