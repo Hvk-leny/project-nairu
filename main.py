@@ -157,7 +157,7 @@ try:
             
             # On envoie le message de l'utilisateur à Gemini
             # (Remplace 'user_input' par le nom de ta variable si besoin)
-            response = model.generate_content(user_input)
+            response = model.generate_content(prompt)
             
             # La réponse textuelle de Gemini est disponible dans : response.text
             # Tu peux l'afficher avec st.write(response.text) ou l'ajouter à ton historique
