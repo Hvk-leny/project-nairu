@@ -149,7 +149,7 @@ elif option == "Option Passionné / Intéressé 🔥":
     model_name = "gemini-1.5-flash"
 # ----------------------------------------
 # --- APPEL À GEMINI ---
-        try:
+try:
             # On prépare le modèle Gemini avec le comportement choisi
             model = genai.GenerativeModel(
                 model_name=model_name,
