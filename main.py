@@ -119,3 +119,50 @@ else:
             st.session_state.data["users"][prenom]["history"].append({"role": "user", "content": prompt})
             st.session_state.data["users"][prenom]["history"].append({"role": "assistant", "content": reponse_ia})
             sauvegarder_base(st.session_state.data)
+import streamlit as st
+import google.generativeai as genai
+# --- CONFIGURATION GEMINI ET INTERFACE ---
+# Activation de ta clé API Gemini
+genai.configure(api_key="AQ.Ab8RN6KqmDWeAQNop2WUxrlaTUvgIROB9Bh8kjX-UwT1dJRS7w")
+
+# Création du menu dans la barre latérale
+st.sidebar.title("⚡ Configuration du Néron")
+option = st.sidebar.radio(
+    "Choisis le mode de fonctionnement :",
+    ("Option Flash ⚡", "Option Réflexion 🧠", "Option Passionné / Intéressé 🔥")
+)
+
+# Réglage du comportement du Néron selon l'option choisie
+if option == "Option Flash ⚡":
+    st.sidebar.info("Mode Flash : Réponses courtes et ultra rapides.")
+    system_instruction = "Tu es Néron. Réponds de manière ultra rapide, concise, claire et directe, va droit au but."
+    model_name = "gemini-1.5-flash"
+    
+elif option == "Option Réflexion 🧠":
+    st.sidebar.info("Mode Réflexion : Analyse profonde et structurée.")
+    system_instruction = "Tu es Néron. Prends le temps de bien analyser. Donne une réponse très détaillée, logique, technique et approfondie."
+    model_name = "gemini-1.5-pro" # Modèle plus puissant pour la réflexion
+    
+elif option == "Option Passionné / Intéressé 🔥":
+    st.sidebar.info("Mode Passionné : Expert auto à 100% !")
+    system_instruction = "Tu es Néron, un expert automobile absolu. Réponds avec énormément d'enthousiasme et de passion. Utilise un ton dynamique et fais des parallèles avec la mécanique, la prépa ou la haute performance (moteurs comme le B58, châssis) dès que possible."
+    model_name = "gemini-1.5-flash"
+# ----------------------------------------
+# --- APPEL À GEMINI ---
+        try:
+            # On prépare le modèle Gemini avec le comportement choisi
+            model = genai.GenerativeModel(
+                model_name=model_name,
+                system_instruction=system_instruction
+            )
+            
+            # On envoie le message de l'utilisateur à Gemini
+            # (Remplace 'user_input' par le nom de ta variable si besoin)
+            response = model.generate_content(user_input)
+            
+            # La réponse textuelle de Gemini est disponible dans : response.text
+            # Tu peux l'afficher avec st.write(response.text) ou l'ajouter à ton historique
+            
+        except Exception as e:
+            st.error(f"Erreur Gemini : {e}")
+        # ----------------------
