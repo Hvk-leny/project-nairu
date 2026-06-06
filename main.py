@@ -119,8 +119,6 @@ else:
             st.session_state.data["users"][prenom]["history"].append({"role": "user", "content": prompt})
             st.session_state.data["users"][prenom]["history"].append({"role": "assistant", "content": reponse_ia})
             sauvegarder_base(st.session_state.data)
-import streamlit as st
-import google.generativeai as genai
 # --- CONFIGURATION GEMINI ET INTERFACE ---
 # Activation de ta clé API Gemini
 genai.configure(api_key="AQ.Ab8RN6KqmDWeAQNop2WUxrlaTUvgIROB9Bh8kjX-UwT1dJRS7w")
