@@ -211,37 +211,42 @@ else:
         st.markdown(f'<div style="text-align: right; color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 20px;">🕒 {heure_actuelle}</div>', unsafe_allow_html=True)
 
 # ==============================================================================
-# --- BOUTON DE NAVIGATION NATIF ---
+# --- FIX FINAL ET EXCLUSIF : BOUTONS CYBER OUVRIR / FERMER ---
 # ==============================================================================
-# On masque complètement le bouton d'origine buggué en CSS
 st.markdown(
     """
     <style>
+    /* 1. ON FORCE LE CONTENEUR DU BOUTON À REPAREÎTRE CORECTEMENT */
     [data-testid="stSidebarCollapseButton"] {
-        display: none !important;
-        visibility: hidden !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        z-index: 999999 !important;
     }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
-# On gère l'ouverture/fermeture proprement avec un vrai bouton
-if "sidebar_state" not in st.session_state:
-    st.session_state.sidebar_state = "expanded"
+    /* 2. STYLE OVALE CAPSULE DU BOUTON */
+    [data-testid="stSidebarCollapseButton"] button {
+        background-color: #151d30 !important;
+        border: 1px solid rgba(0, 240, 255, 0.4) !important;
+        border-radius: 20px !important;
+        padding: 6px 16px !important;
+        color: #00f0ff !important;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        width: 100px !important;
+        height: 38px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+        transition: all 0.2s ease !important;
+    }
 
-if st.session_state.sidebar_state == "collapsed":
-    if st.button("Ouvrir ➔"):
-        st.session_state.sidebar_state = "expanded"
-        st.損rerun()
-
-# ==============================================================================
-# --- INTERFACE FINALE : BOUTONS DYNAMIQUES OUVRIR / FERMER ---
-# ==============================================================================
-st.markdown(
-    """
-    <style>
-    /* 1. ON SUPPRIME DÉFINITIVEMENT TOUS LES TEXTES ET ICÔNES NATIVES (Bugs) */
+    /* 3. MASQUAGE ABSOLU DU TEXTE BUGGUÉ DE STREAMLIT */
     [data-testid="stSidebarCollapseButton"] button div,
     [data-testid="stSidebarCollapseButton"] button span,
     [data-testid="stSidebarCollapseButton"] button svg {
@@ -250,53 +255,26 @@ st.markdown(
         opacity: 0 !important;
     }
 
-    /* 2. DESIGN DES NOUVEAUX BOUTONS (Capsule Cyber) */
-    [data-testid="stSidebarCollapseButton"] button {
-        background-color: #151d30 !important;
-        border: 1px solid rgba(0, 240, 255, 0.4) !important;
-        border-radius: 30px !important; /* Forme ovale */
-        padding: 8px 20px !important;
-        color: #00f0ff !important;
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
-        font-size: 14px !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 1px !important;
-        transition: all 0.3s ease !important;
-        min-width: 110px !important;
-        height: 40px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-
-    /* 3. TEXTE "OUVRIR" (Quand le volet est fermé) */
+    /* 4. TEXTE DYNAMIQUE SANS RÉSIDU */
     [data-testid="stSidebarCollapseButton"] button::after {
         content: "Ouvrir ➔" !important;
-        visibility: visible !important;
         display: block !important;
+        color: #00f0ff !important;
     }
 
-    /* 4. TEXTE "FERMER" (Quand le volet est ouvert) */
-    /* On détecte l'ouverture grâce à l'état du panneau latéral */
     .stApp:has([data-testid="stSidebar"][aria-expanded="true"]) [data-testid="stSidebarCollapseButton"] button::after {
         content: "Fermer ✕" !important;
     }
 
-    /* 5. EFFET LUMINEUX AU SURVOL */
+    /* 5. EFFET AU SURVOL */
     [data-testid="stSidebarCollapseButton"] button:hover {
         background-color: #00f0ff !important;
         color: #070a10 !important;
-        box-shadow: 0 0 20px rgba(0, 240, 255, 0.5) !important;
-        border-color: #ffffff !important;
-        cursor: pointer !important;
-    }
-
-    /* Ajustement de la position du bouton pour qu'il ne colle pas au bord */
-    [data-testid="stSidebarCollapseButton"] {
-        padding: 10px !important;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.5) !important;
     }
     </style>
     """,
+    unsafe_allow_html=True
+)
     unsafe_allow_html=True
 )
