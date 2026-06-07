@@ -385,23 +385,23 @@ st.markdown(
 )
 
 # ==============================================================================
-# --- EXTENSION : MODE INVITÉ (OPTION DM INSTA OU PRÉSENTATION) ---
+# --- CORRECTION : BOUTON INVITÉ SUR LA PAGE D'ACCUEIL "BIENVENUE SUR NAIRU" ---
 # ==============================================================================
 
-st.sidebar.write("---")
-st.sidebar.subheader("👤 Espace Connexion")
-
-# Initialisation du statut si non existant
+# Si l'utilisateur n'est pas connecté, on affiche le bouton au centre de la page
 if "statut_connexion" not in st.session_state:
     st.session_state.statut_connexion = "Déconnecté"
 
-# Bouton pour activer le mode invité
 if st.session_state.statut_connexion == "Déconnecté":
-    if st.sidebar.button("🎭 Se connecter en tant qu'invité", use_container_width=True):
+    # On crée un espace sous ton message "Bienvenue sur Nairu"
+    st.write("")
+    
+    # Bouton de connexion invité centré sur la page principale
+    if st.button("🎭 Se connecter en tant qu'invité", use_container_width=True):
         st.session_state.statut_connexion = "Invité"
         st.rerun()
 
-# Interface du Mode Invité
+# Si le mode invité est activé, on affiche les deux options (Insta et Présentation)
 if st.session_state.statut_connexion == "Invité":
     st.write("---")
     
@@ -409,13 +409,13 @@ if st.session_state.statut_connexion == "Invité":
         """
         <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 18px; border: 1px solid rgba(0, 180, 216, 0.2); text-align: center; margin-bottom: 25px;">
             <h3 style="color: #00b4d8; margin-top: 0; margin-bottom: 5px;">✨ Bienvenue sur Nairu AI</h3>
-            <p style="color: #gray; font-size: 14px; margin: 0;">Mode Invité • Accès Découverte</p>
+            <p style="color: gray; font-size: 14px; margin: 0;">Mode Invité • Accès Découverte</p>
         </div>
         """,
         unsafe_allow_html=True
     )
     
-    # Séparation en deux colonnes : DM Insta ou Présentation
+    # Les deux options : DM Insta et Présentation
     col1, col2 = st.columns(2)
     
     with col1:
@@ -441,7 +441,7 @@ if st.session_state.statut_connexion == "Invité":
             <div style="background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); height: 100%;">
                 <p style="font-size: 30px; margin: 0; text-align: center;">🤖</p>
                 <h4 style="margin: 10px 0 10px 0; color: #ffffff; text-align: center;">Présentation de l'IA</h4>
-                <p style="font-size: 13px; color: #e0e1dd; margin-bottom: 5px;"><b>Nairu</b> est un assistant virtuel intelligent de dernière génération conçu pour être performant, fluide et stylé.</p>
+                <p style="font-size: 13px; color: #e0e1dd; margin-bottom: 5px;"><b>Nairu</b> est un assistant virtuel intelligent conçu pour être performant, fluide et stylé.</p>
                 <ul style="font-size: 12px; color: #a0a0a0; padding-left: 15px; margin: 0;">
                     <li>⚡ <b>Moteur Groq :</b> Réponses instantanées.</li>
                     <li>🌐 <b>Recherche Web :</b> Connecté à Internet.</li>
@@ -452,8 +452,8 @@ if st.session_state.statut_connexion == "Invité":
             unsafe_allow_html=True
         )
 
-    # Bouton pour faire machine arrière
+    # Bouton pour revenir à la page de bienvenue de départ
     st.write("")
-    if st.button("⬅️ Retour à la page de connexion", use_container_width=True):
+    if st.button("⬅️ Retour à la page d'accueil", use_container_width=True):
         st.session_state.statut_connexion = "Déconnecté"
         st.rerun()
