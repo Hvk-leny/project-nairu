@@ -3,6 +3,7 @@ import json
 import os
 import requests
 from groq import Groq
+from duckduckgo_search import DDGS
 
 # ==============================================================================
 # --- 1. FONCTIONS DE LA BASE DE DONNÉES JSON (AVEC SÉCURITÉ IP) ---
@@ -17,14 +18,16 @@ def recuperer_ip_visiteur():
         return "127.0.0.1"
 
 def charger_utilisateurs():
+    # Comptes permanents qui ne s'effaceront JAMAIS
+    comptes_permanents = {
+        "admin1": {"email": "admin@nairu.com", "password": "adminnairu1", "ip": "127.0.0.1"},
+        "leny": {"email": "leny@nairu.com", "password": "lenynairu", "ip": "0.0.0.0"},
+        "eliott": {"email": "eliott@nairu.com", "password": "eliottnairu", "ip": "0.0.0.0"},
+        "exemple": {"email": "exemple@nairu.com", "password": "exemple", "ip": "0.0.0.0"}
+    }
+
     if not os.path.exists(DB_FILE):
-        default_db = {
-            "comptes": {
-                "exemple": {"email": "exemple@nairu.com", "password": "exemple", "ip": "0.0.0.0"},
-                "admin1": {"email": "admin@nairu.com", "password": "adminnairu1", "ip": "127.0.0.1"}
-            },
-            "banned_ips": []
-        }
+        default_db = {"comptes": comptes_permanents, "banned_ips": []}
         with open(DB_FILE, "w", encoding="utf-8") as f:
             json.dump(default_db, f, indent=4)
         return default_db
@@ -32,12 +35,15 @@ def charger_utilisateurs():
         with open(DB_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
             if "comptes" not in data:
-                data = {"comptes": data, "banned_ips": []}
-            if "admin1" not in data["comptes"]:
-                data["comptes"]["admin1"] = {"email": "admin@nairu.com", "password": "adminnairu1", "ip": "127.0.0.1"}
+                data = {"comptes": {}, "banned_ips": []}
+            
+            # On réinjecte de force vos comptes pour être sûr qu'ils restent là
+            for nom, infos in comptes_permanents.items():
+                if nom not in data["comptes"]:
+                    data["comptes"][nom] = infos
             return data
     except:
-        return {"comptes": {}, "banned_ips": []}
+        return {"comptes": comptes_permanents, "banned_ips": []}
 
 def sauvegarder_donnees(data):
     with open(DB_FILE, "w", encoding="utf-8") as f:
@@ -45,7 +51,7 @@ def sauvegarder_donnees(data):
 
 def sauvegarder_utilisateur(username, email, password, ip_address):
     data = charger_utilisateurs()
-    data["comptes"][username] = {
+    data["comptes"][username.lower()] = {
         "email": email,
         "password": password,
         "ip": ip_address
@@ -55,13 +61,22 @@ def sauvegarder_utilisateur(username, email, password, ip_address):
 def ip_deja_utilisee(ip_address):
     data = charger_utilisateurs()
     for nom, infos in data["comptes"].items():
-        if infos.get("ip") == ip_address and nom not in ["exemple", "admin1"]:
+        if infos.get("ip") == ip_address and nom not in ["exemple", "admin1", "leny", "eliott"]:
             return True
     return False
 
 def est_ip_bannie(ip_address):
     data = charger_utilisateurs()
     return ip_address in data.get("banned_ips", [])
+
+def executer_recherche_web(requete):
+    try:
+        with DDGS() as ddgs:
+            resultats = [r for r in ddgs.text(requete, max_results=3)]
+            contexte = "\n".join([f"Titre: {res['title']}\nLien: {res['href']}\nExtrait: {res['body']}\n---" for res in resultats])
+            return contexte
+    except:
+        return "Impossible d'accéder au web pour le moment."
 
 # ==============================================================================
 # --- 2. MISE EN PAGE & LOGIQUE DES SESSIONS ---
@@ -76,22 +91,9 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    [data-testid="stIconMaterial"] {
-        font-size: 0px !important;
-        color: transparent !important;
-        line-height: 0 !important;
-        display: none !important;
-    }
-    [data-testid="stExpander"] summary {
-        position: relative !important;
-    }
-    [data-testid="stExpander"] summary::after {
-        content: '➔' !important;
-        font-size: 14px !important;
-        color: #00f0ff !important;
-        position: absolute !important;
-        right: 15px !important;
-    }
+    [data-testid="stIconMaterial"] { font-size: 0px !important; color: transparent !important; display: none !important; }
+    [data-testid="stExpander"] summary { position: relative !important; }
+    [data-testid="stExpander"] summary::after { content: '➔' !important; font-size: 14px !important; color: #00f0ff !important; position: absolute !important; right: 15px !important; }
     </style>
     """,
     unsafe_allow_html=True
@@ -102,37 +104,32 @@ st.title("bienvenue sur nairu")
 if "statut_connexion" not in st.session_state:
     st.session_state.statut_connexion = "Déconnecté"
 
+if "messages_chat" not in st.session_state:
+    st.session_state.messages_chat = []
+
 # ==============================================================================
 # --- 3. INTERFACE DE CONNEXION / INSCRIPTION ---
 # ==============================================================================
 if st.session_state.statut_connexion == "Déconnecté":
-    
     col_gauche, col_centre, col_droite = st.columns([1, 2, 1])
     
     with col_centre:
         with st.container(border=True):
             tab_login, tab_register = st.tabs(["🔒 Connexion", "✨ Créer un compte"])
             
-            # --- ONGLET 1 : CONNEXION ---
             with tab_login:
                 st.markdown("### Connexion")
-                
                 with st.form(key="form_connexion"):
-                    identifiant = st.text_input("Identifiant ou Prénom :", placeholder="exemple", key="login_username")
+                    identifiant = st.text_input("Identifiant ou Prénom :", placeholder="exemple", key="login_username").strip().lower()
                     code_secret = st.text_input("Code secret :", type="password", placeholder="exemple", key="login_password")
                     bouton_connexion = st.form_submit_button("Se connecter", use_container_width=True)
                     
                     if bouton_connexion:
                         user_ip = recuperer_ip_visiteur()
-                        data_totale = charger_utilisateurs() # Chargement global sécurisé
+                        data_totale = charger_utilisateurs()
                         
                         if est_ip_bannie(user_ip):
                             st.error("❌ Accès refusé. Votre connexion internet a été bannie de ce site.")
-                        elif identifiant == "admin1" and code_secret == "adminnairu1":
-                            st.session_state.statut_connexion = "Connecté"
-                            st.session_state.user_connecte = "admin1"
-                            st.success("Accès Super-Admin accordé !")
-                            st.rerun()
                         elif identifiant in data_totale["comptes"] and data_totale["comptes"][identifiant]["password"] == code_secret:
                             st.session_state.statut_connexion = "Connecté"
                             st.session_state.user_connecte = identifiant
@@ -141,17 +138,9 @@ if st.session_state.statut_connexion == "Déconnecté":
                         else:
                             st.error("Identifiant ou mot de passe incorrect.")
             
-            # --- ONGLET 2 : CRÉATION DE COMPTE (SÉCURISÉ PAR IP) ---
             with tab_register:
                 st.markdown("### Créer un compte")
-                st.markdown(
-                    """
-                    > ⚠️ **Note importante :** > * Pour vous connecter, utilisez votre **identifiant** et votre **mot de passe**.  
-                    > * L'**email** sert uniquement à la création du compte.  
-                    > * *Système anti-spam : Une seule création de compte est autorisée par connexion internet (IP).*
-                    """
-                )
-                
+                st.markdown("> *Système anti-spam : Une seule création de compte par IP.*")
                 with st.form(key="form_inscription"):
                     nouvel_identifiant = st.text_input("Choisis un identifiant :", key="reg_username")
                     nouvel_email = st.text_input("Adresse Email :", placeholder="votre@email.com", key="reg_email")
@@ -160,108 +149,80 @@ if st.session_state.statut_connexion == "Déconnecté":
                     
                     if bouton_inscription:
                         data_totale = charger_utilisateurs()
-                        
-                        with st.spinner("Vérification de sécurité..."):
+                        with st.spinner("Vérification..."):
                             user_ip = recuperer_ip_visiteur()
                         
                         if est_ip_bannie(user_ip):
-                            st.error("❌ Opération impossible. Votre connexion internet a été bannie.")
-                        elif nouvel_identifiant.strip() == "" or nouvel_email.strip() == "" or nouveau_code.strip() == "":
-                            st.warning("Veuillez remplir tous les champs.")
-                        elif "@" not in nouvel_email or "." not in nouvel_email:
-                            st.error("Veuillez entrer une adresse email valide.")
-                        elif nouvel_identifiant in data_totale["comptes"]:
+                            st.error("❌ Connexion bannie.")
+                        elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "":
+                            st.warning("Veuillez remplir les champs.")
+                        elif nouvel_identifiant.lower() in data_totale["comptes"]:
                             st.error("Cet identifiant existe déjà !")
                         elif ip_deja_utilisee(user_ip):
-                            st.error("❌ Sécurité : Un compte a déjà été créé avec votre connexion internet.")
+                            st.error("❌ Un compte a déjà été créé avec votre connexion internet.")
                         else:
                             sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code, user_ip)
-                            st.success("🎉 Compte créé avec succès ! Vous pouvez maintenant vous connecter.")
+                            st.success("🎉 Compte créé ! Vous pouvez vous connecter.")
 
-        # --- BLOC AUTONOME INFORMATIONS TOUT EN BAS ---
         st.markdown("<br>", unsafe_allow_html=True)
         with st.expander("ℹ️ En savoir plus sur Nairu (Informations)"):
             st.markdown("### 🚀 À propos de Nairu")
-            st.write(
-                "Nous sommes **deux Toulousains passionnés de tech, Leny et Eliott**. "
-                "Un soir, on a eu l'idée un peu folle de créer l'outil ultime de recherche "
-                "tout en gardant vos données en parfaite sécurité. C'est comme ça que Nairu est né !"
-            )
-            st.markdown("---")
-            st.markdown("### 📱 Nos Réseaux Sociaux")
+            st.write("Nous sommes deux Toulousains passionnés de tech, Leny et Eliott...")
             
-            # Création des deux colonnes : Eliott à gauche, Leny à droite
             col_eliott, col_leny = st.columns(2)
-            
             with col_eliott:
                 st.markdown("**⭐ Eliott**")
                 st.link_button("📸 Instagram d'Eliott", "https://instagram.com/eliott31tls", use_container_width=True)
-                
             with col_leny:
                 st.markdown("**⚡ Leny**")
                 st.link_button("📸 Instagram de Leny", "https://instagram.com/ton_pseudo_instagram", use_container_width=True)
                 st.link_button("📺 YouTube de Leny", "https://www.youtube.com/@Hvk_Falkon", use_container_width=True)
-                
-            st.markdown("---")
-            st.markdown("### 🪲 Un problème ou un bug ?")
-            st.write("Si vous rencontrez un problème technique ou si vous voulez nous faire un retour, signalez-le en DM :")
-            st.link_button("💬 Signaler un problème sur Instagram", "https://instagram.com/eliott31tls", use_container_width=True)
-            st.caption("Auteurs principaux : @eliott31tls & @Falkon")
 
 # ==============================================================================
 # --- 4. INTERFACE UNE FOIS CONNECTÉ ---
 # ==============================================================================
 else:
-    # 🔴 CAS COMPTE SUPER-ADMINISTRATEUR (admin1)
-    if st.session_state.user_connecte == "admin1":
-        st.markdown("## 🛠️ PANNEAU DE CONTRÔLE SÉCURITÉ - NAIRU")
-        st.info("Bienvenue Eliott ou Leny. Ici, vous gérez les utilisateurs et bloquez les attaques par spam.")
-        
-        data_totale = charger_utilisateurs()
-        
-        st.markdown("### 👥 Utilisateurs enregistrés et Adresses IP")
-        
-        for nom, infos in data_totale["comptes"].items():
-            if nom != "admin1" and nom != "exemple":
-                col_user, col_ip, col_action = st.columns([2, 2, 1])
-                with col_user:
-                    st.write(f"**Identifiant :** {nom} ({infos.get('email', 'Pas de mail')})")
-                with col_ip:
-                    st.code(infos.get('ip', '0.0.0.0'))
-                with col_action:
-                    if st.button(f"🚫 Bannir", key=f"ban_{nom}"):
-                        user_ip_to_ban = infos.get('ip')
-                        if user_ip_to_ban and user_ip_to_ban not in data_totale["banned_ips"]:
-                            data_totale["banned_ips"].append(user_ip_to_ban)
-                            del data_totale["comptes"][nom]
-                            sauvegarder_donnees(data_totale)
-                            st.success(f"IP {user_ip_to_ban} bannie et compte supprimé !")
-                            st.rerun()
+    # 🔴 PANNEAU DE CONTRÔLE ADMIN POUR LENY & ELIOTT
+    if st.session_state.user_connecte in ["admin1", "leny", "eliott"]:
+        with st.sidebar:
+            st.markdown("### 🛠️ Mode Administrateur")
+            st.info(f"Connecté en tant que : {st.session_state.user_connecte}")
+            if st.checkbox("Voir la gestion des comptes"):
+                data_totale = charger_utilisateurs()
+                st.write(data_totale["comptes"])
 
-        # --- SECTION IP BANNIES ---
-        st.markdown("---")
-        st.markdown("### 🛑 Liste des adresses IP bloquées")
-        if not data_totale.get("banned_ips"):
-            st.write("*Aucune IP bloquée pour le moment. Le site est safe.*")
-        else:
-            for ip in data_totale["banned_ips"]:
-                col_banned, col_unban = st.columns([4, 1])
-                with col_banned:
-                    st.error(f"IP Bloquée : {ip}")
-                with col_unban:
-                    if st.button("🔓 Débloquer", key=f"unban_{ip}"):
-                        data_totale["banned_ips"].remove(ip)
-                        sauvegarder_donnees(data_totale)
-                        st.success(f"IP {ip} débloquée !")
-                        st.rerun()
-
-    # 🟢 CAS UTILISATEUR CLASSIQUE CONNECTÉ
-    else:
-        st.write(f"Félicitations {st.session_state.user_connecte}, tu es connecté à l'interface de Nairu ! Moteur prêt.")
+    # 🟢 CHAT IA POUR TOUT LE MONDE
+    st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
     
-    # BOUTON DE DÉCONNEXION COMMUN
-    st.markdown("<br>", unsafe_allow_html=True)
+    for msg in st.session_state.messages_chat:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
+    
+    prompt_utilisateur = st.chat_input("Posez votre question à Nairu...")
+    
+    if prompt_utilisateur:
+        with st.chat_message("user"):
+            st.write(prompt_utilisateur)
+        st.session_state.messages_chat.append({"role": "user", "content": prompt_utilisateur})
+        
+        try:
+            client_groq = Groq(api_key=st.secrets["GROQ_API_KEY"])
+            with st.chat_message("assistant"):
+                with st.spinner("Nairu fouille le web et réfléchit..."):
+                    contexte_web = executer_recherche_web(prompt_utilisateur)
+                    system_instruction = f"Tu es Nairu, une IA de recherche créée par Leny et Eliott. Utilise ces infos web si besoin : {contexte_web}"
+                    
+                    historique_complet = [{"role": "system", "content": system_instruction}] + st.session_state.messages_chat
+                    reponse_brute = client_groq.chat.completions.create(model="llama3-8b-8192", messages=historique_complet)
+                    texte_reponse = reponse_brute.choices[0].message.content
+                    st.write(texte_reponse)
+            st.session_state.messages_chat.append({"role": "assistant", "content": texte_reponse})
+        except:
+            st.error("❌ Erreur de clé API Groq.")
+
+    st.markdown("<br><hr>", unsafe_allow_html=True)
     if st.button("🔴 Déconnexion", use_container_width=True):
         st.session_state.statut_connexion = "Déconnecté"
         st.session_state.user_connecte = None
+        st.session_state.messages_chat = []
         st.rerun()
