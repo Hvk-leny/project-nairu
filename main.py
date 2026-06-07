@@ -189,11 +189,21 @@ if st.session_state.statut_connexion == "Déconnecté":
             )
             st.markdown("---")
             st.markdown("### 📱 Nos Réseaux Sociaux")
-            col_insta, col_tiktok = st.columns(2)
-            with col_insta:
-                st.link_button("📸 Instagram", "https://instagram.com/eliott31tls", use_container_width=True)
-            with col_tiktok:
-                st.link_button("🎵 TikTok", "https://tiktok.com/@eliott31tls", use_container_width=True)
+            
+            # Création des deux colonnes : Eliott à gauche, Leny à droite
+            col_eliott, col_leny = st.columns(2)
+            
+            with col_eliott:
+                st.markdown("**⭐ Eliott**")
+                st.link_button("📸 Instagram d'Eliott", "https://instagram.com/eliott31tls", use_container_width=True)
+                st.link_button("🎵 TikTok d'Eliott", "https://tiktok.com/@eliott31tls", use_container_width=True)
+                
+            with col_leny:
+                st.markdown("**⚡ Leny (Falkon)**")
+                # Tu pourras remplacer ces liens fictifs par tes vrais réseaux si tu veux !
+                st.link_button("📸 Instagram de Leny", "https://instagram.com/hvk_leny_ou_ton_pseudo", use_container_width=True)
+                st.link_button("🎵 TikTok de Leny", "https://tiktok.com/@ton_pseudo_tiktok", use_container_width=True)
+                
             st.markdown("---")
             st.markdown("### 🪲 Un problème ou un bug ?")
             st.write("Si vous rencontrez un problème technique ou si vous voulez nous faire un retour, signalez-le en DM :")
@@ -256,5 +266,4 @@ else:
     if st.button("🔴 Déconnexion", use_container_width=True):
         st.session_state.statut_connexion = "Déconnecté"
         st.session_state.user_connecte = None
-        
         st.rerun()
