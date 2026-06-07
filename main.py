@@ -469,48 +469,43 @@ if st.session_state.statut_connexion == "Invité":
         st.rerun()
 
 # ==============================================================================
-# --- LE TOUT NOUVEAU STYLE : LUXE MARBRE BLANC & SIDEBAR GLISSANTE ---
+# --- EXTENSION : THÈME ROLEX LUXURY (VERT IMPÉRIAL, OR & SIDEBAR GLISSANTE) ---
 # ==============================================================================
 
 st.markdown(
     """
     <style>
-    /* 1. Fond d'écran type Marbre Blanc */
+    /* 1. Fond d'écran : Le vert profond texturé signature de Rolex */
     .stApp {
-        background-color: #f4f5f6 !important;
-        background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)),
-            url('https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=2070&auto=format&fit=crop') !important;
-        background-size: cover !important;
-        background-position: center !important;
+        background-color: #002b19 !important;
+        background-image: radial-gradient(circle at center, #004d2e 0%, #001f12 100%) !important;
         background-attachment: fixed !important;
     }
 
-    /* 2. Barre de recherche flottante avec tâche d'ombre portée */
+    /* 2. Barre de recherche flottante : Noir mat, liseré Or et ombre douce */
     div[data-testid="stChatInput"] {
-        border-radius: 24px !important;
-        border: 1px solid rgba(0, 0, 0, 0.08) !important;
-        background-color: #ffffff !important;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.06) !important;
+        border-radius: 4px !important; /* Forme plus rectiligne et horlogère */
+        border: 1px solid #A37E2C !important;
+        background-color: #111111 !important;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6) !important;
         transition: transform 0.3s ease, box-shadow 0.3s ease !important;
     }
     
-    div[data-testid="stChatInput"]:focus-within {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18) !important;
+    div[data-testid="stChatInput"] textarea {
+        color: #ffffff !important;
     }
 
-    /* 3. Barre latérale cachée qui s'ouvre quand on approche la souris */
+    /* 3. Barre latérale magique : Version feutrée Or et Sombre */
     [data-testid="stSidebar"] {
         position: fixed !important;
         left: -290px !important;
         top: 0 !important;
         bottom: 0 !important;
         width: 320px !important;
-        background-color: rgba(255, 255, 255, 0.95) !important;
+        background-color: rgba(17, 17, 17, 0.95) !important;
         backdrop-filter: blur(15px) !important;
         -webkit-backdrop-filter: blur(15px) !important;
-        border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
+        border-right: 2px solid #A37E2C !important;
         transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
         z-index: 999991 !important;
         padding-left: 20px !important;
@@ -529,50 +524,61 @@ st.markdown(
 
     [data-testid="stSidebar"]:hover {
         left: 0 !important;
-        box-shadow: 15px 0 40px rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 15px 0 40px rgba(0, 0, 0, 0.5) !important;
     }
 
     [data-testid="stSidebarCollapseButton"] {
         display: none !important;
     }
 
-    /* 4. Bulles de message épurées */
+    /* 4. Bulles de message : Style écrin de montre */
     .stChatMessage {
-        background-color: rgba(255, 255, 255, 0.7) !important;
-        backdrop-filter: blur(5px) !important;
-        border: 1px solid rgba(0, 0, 0, 0.04) !important;
-        border-radius: 16px !important;
-        color: #222222 !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02) !important;
+        background-color: rgba(17, 17, 17, 0.6) !important;
+        border: 1px solid rgba(163, 126, 44, 0.2) !important;
+        border-radius: 6px !important;
+        color: #e5e5e5 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
     }
 
+    /* Message de l'utilisateur surligné d'or */
     .stChatMessage[data-testid="stChatMessageUser"] {
-        background-color: #ffffff !important;
-        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        background-color: rgba(163, 126, 44, 0.1) !important;
+        border: 1px solid #A37E2C !important;
     }
 
-    /* 5. Textes et titres minimalistes */
+    /* 5. Textes et titres en blanc cassé et Or */
     h1, h2, h3, h4, p, span, label, li {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        color: #2c3e50 !important;
+        font-family: "Playfair Display", "Georgia", serif !important; /* Police plus classique et haut de gamme */
+        color: #f5f5f5 !important;
     }
     
-    h1, h2, h3 {
-        font-weight: 600 !important;
+    h1, h2, h3, .stSidebar subheader {
+        color: #A37E2C !important; /* Couleur Or pour les grands titres */
+        font-weight: 500 !important;
+        letter-spacing: 1px !important;
     }
 
-    /* Boutons de l'interface */
+    /* 6. Boutons et curseurs en Or */
     .stButton>button {
-        background-color: #ffffff !important;
-        color: #2c3e50 !important;
-        border: 1px solid rgba(0, 0, 0, 0.1) !important;
-        border-radius: 10px !important;
+        background-color: transparent !important;
+        color: #A37E2C !important;
+        border: 1px solid #A37E2C !important;
+        border-radius: 4px !important;
+        font-family: inherit !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
         transition: all 0.2s ease !important;
     }
 
     .stButton>button:hover {
-        background-color: #2c3e50 !important;
-        color: #ffffff !important;
+        background-color: #A37E2C !important;
+        color: #111111 !important;
+        box-shadow: 0 0 15px rgba(163, 126, 44, 0.4) !important;
+    }
+    
+    div[data-testid="stSlider"] [data-testid="stThumb"] {
+        background-color: #A37E2C !important;
+        box-shadow: 0 0 10px rgba(163, 126, 44, 0.5) !important;
     }
     </style>
     """,
