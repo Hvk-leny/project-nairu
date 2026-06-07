@@ -103,6 +103,50 @@ if st.session_state.statut_connexion == "Déconnecté":
                     st.error("❌ Identifiant non reconnu.")
                     if st.session_state.statut_connexion == "Déconnecté":
                          st.title("Connexion à Nairu")
-    
+# ==============================================================================
+# --- INTERFACE DE L'ACCÈS INVITÉ ---
+# ==============================================================================
+st.markdown("### 🌐 Espace Invité")
+
+# --- 1. CODE DE SÉCURITÉ POUR ACCÉDER À LA VERSION DE TEST ---
+st.info("💡 Bienvenue sur l'accès invité de Nairu. Prenez connaissance des informations ci-dessous avant de vous lancer.")
+
+# --- 2. BOUTON EN SAVOIR PLUS ---
+with st.expander("ℹ️ En savoir plus sur l'application"):
+    st.write(
+        "Actuellement, un compte utilisateur est **strictement requis** pour utiliser la version complète "
+        "et débloquer toutes les fonctionnalités de l'IA Nairu."
+    )
+    st.write(
+        "Cette restriction nous permet de garantir une vitesse optimale et une sécurité maximale "
+        "pour chaque membre connecté."
+    )
+
+st.markdown("---")
+
+# --- 3. INFOS TECHNIQUES (GROQ / DUCKDUCKGO) ---
+st.markdown("### ⚡ Spécifications Techniques")
+col_tech1, col_tech2 = st.columns(2)
+
+with col_tech1:
+    st.metric(label="Moteur d'infrastructure", value="Groq Cloud")
+    st.caption("Permet des réponses ultra-rapides et fluides en temps réel.")
+
+with col_tech2:
+    st.metric(label="Base de connaissances", value="DuckDuckGo Search")
+    st.caption("Fournit une recherche internet en direct pour des infos toujours à jour.")
+
+st.markdown("---")
+
+# --- 4. CONTACT INSTAGRAM (ELIOTT31TLS) ---
+st.markdown("### 📬 Une question ou un problème ?")
+st.write("Si vous avez des questions, des remarques ou besoin d'un accès complet, n'hésitez pas à me contacter directement :")
+
+# Bouton stylisé qui renvoie vers ton Instagram
+st.link_button(
+    "💬 Me contacter sur Instagram", 
+    "https://instagram.com/Eliott31tls"
+)
+st.caption("Compte officiel : @Eliott31tls")    
 
 
