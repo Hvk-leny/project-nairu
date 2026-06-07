@@ -211,71 +211,27 @@ else:
         st.markdown(f'<div style="text-align: right; color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 20px;">🕒 {heure_actuelle}</div>', unsafe_allow_html=True)
 
 # ==============================================================================
-# --- ANTIDOTE COMPLET : PURGE DU BOUTON STREAMLIT ---
+# --- ATOMISATION EXCLUSIVE DU TEXTE DOUBLE_ARROW ---
 # ==============================================================================
 st.markdown(
     """
     <style>
-    /* 1. ON FORCE LE BOUTON À REPAREÎTRE EN HAUT À GAUCHE */
-    [data-testid="stSidebarCollapseButton"] {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        position: fixed !important;
-        top: 12px !important;
-        left: 12px !important;
-        z-index: 999999 !important;
-    }
-
-    /* 2. ON EFFACE TOUT LE CONTENU INTERNE (FLÈCHES ET TEXTES CACHÉS) */
+    /* On cible le conteneur du bouton et on force TOUT son texte interne à devenir invisible et minuscule */
+    [data-testid="stSidebarCollapseButton"] button,
     [data-testid="stSidebarCollapseButton"] button div,
-    [data-testid="stSidebarCollapseButton"] button span,
-    [data-testid="stSidebarCollapseButton"] button svg {
+    [data-testid="stSidebarCollapseButton"] button span {
+        font-size: 0px !important;
+        color: transparent !important;
+        line-height: 0 !important;
+        text-indent: -9999px !important;
+    }
+
+    /* On s'assure que si Streamlit injecte le texte brute, il soit masqué de force */
+    :not(input):not(textarea):contains("arrow"), 
+    :not(input):not(textarea):contains("ouble") {
+        font-size: 0px !important;
+        color: transparent !important;
         display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        font-size: 0 !important;
-        width: 0 !important;
-    }
-
-    /* 3. LOOK OVALE CYBER SANS AUCUN RÉSIDU */
-    [data-testid="stSidebarCollapseButton"] button {
-        background-color: #151d30 !important;
-        border: 1px solid rgba(0, 240, 255, 0.4) !important;
-        border-radius: 20px !important;
-        padding: 6px 16px !important;
-        color: #00f0ff !important;
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
-        font-size: 14px !important;
-        font-weight: 600 !important;
-        width: 105px !important;
-        height: 38px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
-        text-indent: 0 !important;
-    }
-
-    /* 4. TEXTE FIXE QUAND LE PANNEAU EST FERMÉ */
-    [data-testid="stSidebarCollapseButton"] button::after {
-        content: "Ouvrir ➔" !important;
-        display: block !important;
-        color: #00f0ff !important;
-        font-size: 14px !important;
-        letter-spacing: 0.5px !important;
-    }
-
-    /* 5. TEXTE FIXE QUAND LE PANNEAU EST OUVERT */
-    .stApp:has([data-testid="stSidebar"][aria-expanded="true"]) [data-testid="stSidebarCollapseButton"] button::after {
-        content: "Fermer ✕" !important;
-    }
-
-    /* 6. EFFET AU SURVOL */
-    [data-testid="stSidebarCollapseButton"] button:hover {
-        background-color: #00f0ff !important;
-        color: #070a10 !important;
-        box-shadow: 0 0 15px rgba(0, 240, 255, 0.6) !important;
     }
     </style>
     """,
