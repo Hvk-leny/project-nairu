@@ -306,83 +306,93 @@ st.markdown(
 )
 
 # ==============================================================================
-# --- EXTENSION : DESIGN FUTURISTE & EFFET AQUA / GLASSMORPHISM (IOS STYLE) ---
+# --- EXTENSION : DESIGN JARVIS NÉON (CYAN GLOW & HUD FUTURISTE) ---
 # ==============================================================================
 
 st.markdown(
     """
     <style>
-    /* 1. Fond d'écran futuriste avec un dégradé fluide aqua/sombre */
+    /* 1. Fond d'écran Jarvis : Noir profond avec une grille numérique subtile */
     .stApp {
-        background: linear-gradient(135deg, #0d1b2a 0%, #0b253a 50%, #004b6e 100%);
+        background: radial-gradient(circle at center, #00111c 0%, #000814 100%) !important;
         background-attachment: fixed;
     }
 
-    /* 2. Effet "Eau/Verre" (Glassmorphism) sur les bulles de chat */
+    /* 2. Effet Néon Cyan sur les bulles de l'assistant Nairu / Jarvis */
     .stChatMessage {
-        background-color: rgba(255, 255, 255, 0.06) !important;
-        backdrop-filter: blur(12px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 18px !important;
+        background-color: rgba(0, 8, 20, 0.6) !important;
+        border: 1px solid #00f0ff !important;
+        border-radius: 4px !important; /* Forme plus carrée et informatique */
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 10px rgba(0, 240, 255, 0.1) !important;
         padding: 15px !important;
-        margin-bottom: 12px !important;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2) !important;
-        transition: all 0.3s ease;
+        margin-bottom: 15px !important;
+        font-family: 'Courier New', Courier, monospace !important;
     }
 
-    /* Différenciation de la bulle utilisateur (style iOS bleuté transparent) */
+    /* Bulle de l'utilisateur avec un Néon Orange/Gold de l'armure d'Iron Man */
     .stChatMessage[data-testid="stChatMessageUser"] {
-        background-color: rgba(0, 119, 182, 0.2) !important;
-        border: 1px solid rgba(0, 180, 216, 0.3) !important;
+        background-color: rgba(20, 10, 0, 0.5) !important;
+        border: 1px solid #ffaa00 !important;
+        box-shadow: 0 0 15px rgba(255, 170, 0, 0.2), inset 0 0 10px rgba(255, 170, 0, 0.1) !important;
     }
 
-    /* 3. Style de la barre latérale (Sidebar) façon panneau de contrôle transparent */
+    /* 3. Barre latérale style "HUD Tactique" */
     [data-testid="stSidebar"] {
-        background-color: rgba(13, 27, 42, 0.4) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+        background-color: rgba(0, 10, 18, 0.85) !important;
+        border-right: 2px solid #00f0ff !important;
+        box-shadow: 5px 0 15px rgba(0, 240, 255, 0.1) !important;
     }
 
-    /* 4. Personnalisation des boutons (Style boutons d'iPhone en verre) */
+    /* 4. Boutons futuristes avec effet de chargement holographique */
     .stButton>button {
-        background: rgba(255, 255, 255, 0.08) !important;
-        color: #00b4d8 !important;
-        border: 1px solid rgba(0, 180, 216, 0.4) !important;
-        border-radius: 12px !important;
-        backdrop-filter: blur(5px) !important;
-        font-weight: bold !important;
-        transition: all 0.2s ease-in-out !important;
+        background: transparent !important;
+        color: #00f0ff !important;
+        border: 1px solid #00f0ff !important;
+        border-radius: 2px !important;
+        font-family: 'Courier New', Courier, monospace !important;
+        text-transform: uppercase !important;
+        letter-spacing: 2px !important;
+        transition: all 0.3s ease !important;
     }
 
     .stButton>button:hover {
-        background: rgba(0, 180, 216, 0.2) !important;
-        box-shadow: 0 0 15px rgba(0, 180, 216, 0.5) !important;
+        background: rgba(0, 240, 255, 0.15) !important;
+        box-shadow: 0 0 20px #00f0ff, inset 0 0 10px #00f0ff !important;
         color: #ffffff !important;
-        transform: scale(1.02);
     }
 
-    /* 5. Titres et textes flashys futuristes */
-    h1, h2, h3, p, span, label {
-        color: #e0e1dd !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    /* 5. Curseurs (Sliders) et éléments actifs qui brillent */
+    div[data-testid="stSlider"] [data-testid="stThumb"] {
+        background-color: #00f0ff !important;
+        box-shadow: 0 0 15px #00f0ff !important;
+        border-radius: 0px !important;
     }
     
-    /* Couleur néon aqua pour le titre de configuration */
-    .stSidebar subheader, .stSidebar title {
-        color: #00b4d8 !important;
+    div[data-testid="stSlider"] [data-testid="stTrack"] {
+        background-color: rgba(0, 240, 255, 0.2) !important;
     }
 
-    /* 6. Curseur de créativité (Slider) style néon */
-    div[data-testid="stSlider"] [data-testid="stThumb"] {
-        background-color: #00b4d8 !important;
-        box-shadow: 0 0 10px #00b4d8 !important;
+    /* 6. Police d'écriture style Terminal Informatique */
+    h1, h2, h3, p, span, label, li {
+        font-family: 'Courier New', Courier, monospace !important;
+        color: #a0e0ff !important;
+        text-shadow: 0 0 2px rgba(0, 240, 255, 0.5) !important;
+    }
+
+    /* Titres qui clignotent ou brillent en Cyan Néon */
+    h1, h2, h3 {
+        color: #00f0ff !important;
+        letter-spacing: 1px !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
+# Petit message d'initialisation façon I.A de Stark
+if 'jarvis_boot' not in st.session_state:
+    st.toast("Système Nairu (Protocol Jarvis) : En ligne. Systèmes opérationnels à 100%.", icon="🤖")
+    st.session_state.jarvis_boot = True
 
 # ==============================================================================
 # --- CORRECTION : BOUTON INVITÉ SUR LA PAGE D'ACCUEIL "BIENVENUE SUR NAIRU" ---
