@@ -150,3 +150,47 @@ st.link_button(
 st.caption("Compte officiel : @Eliott31tls")    
 
 
+# ==============================================================================
+# --- FIX FINAL : ESPACE INVITÉ (FLÈCHE ET CHEVAUCHEMENT) ---
+# ==============================================================================
+st.markdown(
+    """
+    <style>
+    /* 1. ON FORGE LA PETITE FLÈCHE SUR LE MENU DÉPLIANT (EXPANDER) */
+    [data-testid="stExpander"] summary::after {
+        content: '➔' !important; /* On remplace l'icône manquante par une flèche */
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-size: 16px !important;
+        color: #00f0ff !important; /* Cyan pour le style */
+        position: absolute !important;
+        top: 50% !important;
+        right: 15px !important;
+        transform: translateY(-50%) !important;
+        transition: transform 0.2s ease !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Animation de la flèche quand le menu est ouvert */
+    [data-testid="stExpander"][open] summary::after {
+        transform: translateY(-50%) rotate(90deg) !important;
+    }
+
+    /* 2. ON NETTOIE LE CHEVAUCHEMENT DU TEXTE SUR MOBILE ET PETITS ÉCRANS */
+    [data-testid="stExpander"] div[role="region"] {
+        padding: 15px !important;
+        overflow-wrap: break-word !important; /* Force le texte à aller à la ligne */
+        word-wrap: break-word !important;
+        hyphens: auto !important;
+    }
+    
+    [data-testid="stExpander"] div[role="region"] p {
+        margin-bottom: 10px !important;
+        line-height: 1.5 !important;
+        color: #e2e8f0 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
