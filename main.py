@@ -732,3 +732,29 @@ if st.session_state.activer_ephemere:
     # (Par exemple, filtrer les messages selon leur horodatage)
 else:
     st.sidebar.caption("💡 Le mode éphémère est désactivé. Les messages restent conservés normalement.")
+
+# ==============================================================================
+# --- LOGIQUE : GESTION DES SAUVEGARDES SELON LE MODE ÉPHÉMÈRE ---
+# ==============================================================================
+
+# On s'assure que la structure de discussion existe
+if "conversations" not in st.session_state:
+    st.session_state.conversations = {"Discussion 1": []}
+
+# Cette fonction va remplacer ou intercepter la logique de sauvegarde classique
+def ajouter_au_chat(role, texte):
+    # SI LE MODE ÉPHÉMÈRE EST ACTIVÉ (True)
+    if st.session_state.get("activer_ephemere", False):
+        # On affiche le message à l'écran pour la session actuelle,
+        # mais on ne pousse rien dans l'historique permanent.
+        st.caption("⏳ *Mode éphémère actif : ce message ne sera pas conservé après la fermeture.*")
+        
+    # SI LE MODE ÉPHÉMÈRE EST DÉSACTIVÉ (False)
+    else:
+        # On enregistre normalement tout dans l'historique
+        current_chat = st.session_state.get("current_chat", "Discussion 1")
+        if current_chat in st.session_state.conversations:
+            st.session_state.conversations[current_chat].append({
+                "role": role, 
+                "content": texte
+            })
