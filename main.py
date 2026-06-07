@@ -182,14 +182,6 @@ if st.session_state.statut_connexion == "Déconnecté":
 # --- 4. INTERFACE UNE FOIS CONNECTÉ ---
 # ==============================================================================
 else:
-    st.write("Félicitations, tu es connecté à l'interface de Nairu ! Moteur prêt.")
-    if st.button("🔴 Déconnexion"):
-        st.session_state.statut_connexion = "Déconnecté"
-        st.rerun()
-        # ==============================================================================
-# --- 4. INTERFACE UNE FOIS CONNECTÉ ---
-# ==============================================================================
-else:
     # 🔴 CAS COMPTE SUPER-ADMINISTRATEUR (admin1)
     if st.session_state.user_connecte == "admin1":
         st.markdown("## 🛠️ PANNEAU DE CONTRÔLE SÉCURITÉ - NAIRU")
@@ -200,21 +192,18 @@ else:
         # --- SECTION COMPTES & IP ---
         st.markdown("### 👥 Utilisateurs enregistrés et Adresses IP")
         
-        # On affiche la liste proprement
         for nom, infos in data_totale["comptes"].items():
-            if nom != "admin1" and nom != "exemple": # On masque les admins de la liste de modération
+            if nom != "admin1" and nom != "exemple":
                 col_user, col_ip, col_action = st.columns([2, 2, 1])
                 with col_user:
                     st.write(f"**Identifiant :** {nom} ({infos.get('email', 'Pas de mail')})")
                 with col_ip:
                     st.code(infos.get('ip', '0.0.0.0'))
                 with col_action:
-                    # Bouton pour bannir l'IP de ce compte
                     if st.button(f"🚫 Bannir", key=f"ban_{nom}"):
                         user_ip_to_ban = infos.get('ip')
                         if user_ip_to_ban and user_ip_to_ban not in data_totale["banned_ips"]:
                             data_totale["banned_ips"].append(user_ip_to_ban)
-                            # On supprime le compte du spammeur pour nettoyer
                             del data_totale["comptes"][nom]
                             sauvegarder_donnees(data_totale)
                             st.success(f"IP {user_ip_to_ban} bannie et compte supprimé !")
