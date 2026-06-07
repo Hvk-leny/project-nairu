@@ -85,7 +85,7 @@ if st.session_state.statut_connexion == "Déconnecté":
     
     col_x1, col_form, col_x2 = st.columns([1, 2, 1])
     with col_form:
-        tab_login, tab_guest = st.tabs(["🔒 Connexion ", )
+        tab_login, tab_guest = st.tabs(["🔒 Connexion "])
         
         with tab_login:
             st.write("")
