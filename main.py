@@ -1,10 +1,43 @@
 import streamlit as st
 import json
 import os
+import requests
+import random
 from groq import Groq
 
 # ==============================================================================
-# --- 1. FONCTIONS DE LA BASE DE DONNÉES JSON ---
+# --- 1. FONCTION D'ENVOI DE MAIL VIA BREVO ---
+# ==============================================================================
+def envoyer_code_verification(email_destinataire):
+    code = str(random.randint(100000, 999999))
+    url = "https://api.brevo.com/v3/smtp/email"
+    
+    headers = {
+        "accept": "application/json",
+        "api-key": "xsmtpsib-4b98b43cd2774b9811ba0e6b91e919eb2cda02083eba9f1299ce8b51ae44ae05-OlOkVkE5bCGgzZt3",
+        "content-type": "application/json"
+    }
+    
+    data = {
+        "sender": {"name": "Nairu AI", "email": "nairu.ia.toulouse@outlook.com"},
+        "to": [{"email": email_destinataire}],
+        "subject": "🔑 Code de vérification Nairu",
+        "textContent": f"Bonjour,\n\nVoici votre code de vérification pour finaliser la création de votre compte Nairu :\n\n👉 {code}\n\nL'email sert uniquement à la création du compte. Pour vous connecter, utilisez votre identifiant et votre mot de passe.\n\nL'équipe Nairu (Eliott & Leny)"
+    }
+    
+    try:
+        response = requests.post(url, json=data, headers=headers)
+        if response.status_code == 201:
+            return code
+        else:
+            print(f"Erreur Brevo : {response.text}")
+            return None
+    except Exception as e:
+        print(f"Erreur connexion : {e}")
+        return None
+
+# ==============================================================================
+# --- 2. FONCTIONS DE LA BASE DE DONNÉES JSON ---
 # ==============================================================================
 DB_FILE = "utilisateurs.json"
 
@@ -46,7 +79,7 @@ def sauvegarder_utilisateur(username, email, password):
         json.dump(comptes, f, indent=4)
 
 # ==============================================================================
-# --- 2. MISE EN PAGE & BIENVENUE ---
+# --- 3. MISE EN PAGE & LOGIQUE DES SESSIONS ---
 # ==============================================================================
 st.set_page_config(
     page_title="NAIRU - AI",
@@ -55,7 +88,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Masquage des bugs d'icônes natifs
 st.markdown(
     """
     <style>
@@ -80,30 +112,23 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Ton grand titre d'accueil
 st.title("bienvenue sur nairu")
-# ==============================================================================
-# --- 3. LOGIQUE DES SESSIONS ET INTERFACE DE CONNEXION ---
-# ==============================================================================
 
-# On initialise le statut de connexion s'il n'existe pas encore
 if "statut_connexion" not in st.session_state:
     st.session_state.statut_connexion = "Déconnecté"
 
-# Si l'utilisateur est déconnecté, on affiche le rectangle de connexion au centre
+# ==============================================================================
+# --- 4. INTERFACE DE CONNEXION / INSCRIPTION ---
+# ==============================================================================
 if st.session_state.statut_connexion == "Déconnecté":
     
-    # On crée 3 colonnes pour centrer le rectangle au milieu de l'écran (largeur 1/2/1)
     col_gauche, col_centre, col_droite = st.columns([1, 2, 1])
     
     with col_centre:
-        # On ouvre un cadre visuel propre (un container) pour simuler le rectangle de l'interface
         with st.container(border=True):
-            
-            # Création des deux onglets à l'intérieur du rectangle
             tab_login, tab_register = st.tabs(["🔒 Connexion", "✨ Créer un compte"])
             
-            # --- STRUCTURE DE L'ONGLET 1 : CONNEXION ---
+            # --- ONGLET 1 : CONNEXION ---
             with tab_login:
                 st.markdown("### Connexion")
                 base_comptes = charger_utilisateurs()
@@ -121,11 +146,9 @@ if st.session_state.statut_connexion == "Déconnecté":
                         else:
                             st.error("Identifiant ou mot de passe incorrect.")
             
-            # --- STRUCTURE DE L'ONGLET 2 : CRÉATION DE COMPTE ---
+            # --- ONGLET 2 : CRÉATION DE COMPTE ---
             with tab_register:
                 st.markdown("### Créer un compte")
-                
-                # Bloc d'explication obligatoire
                 st.markdown(
                     """
                     > ⚠️ **Note importante :** > * Pour vous connecter, utilisez votre **identifiant** et votre **mot de passe**.  
@@ -148,15 +171,43 @@ if st.session_state.statut_connexion == "Déconnecté":
                         elif nouvel_identifiant in base_comptes:
                             st.error("Cet identifiant existe déjà !")
                         else:
-                            sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code)
-                            st.success("🎉 Compte créé ! Connecte-toi dans l'onglet d'à côté.")
-                            # ==============================================================================
-    # --- BLOC AUTONOME : INFORMATIONS (À POSER TOUT EN BAS) ---
-    # ==============================================================================
-    # On se remet au centre pour que ça s'aligne sous ton rectangle
-    with col_centre:
-        st.markdown("<br>", unsafe_allow_html=True) # Petit espace
-        
+                            with st.spinner("Envoi du code de vérification par mail..."):
+                                code_envoye = envoyer_code_verification(nouvel_email)
+                                
+                            if code_envoye:
+                                st.session_state.temp_user = {
+                                    "id": nouvel_identifiant,
+                                    "email": nouvel_email,
+                                    "password": nouveau_code,
+                                    "code": code_envoye
+                                }
+                                st.success("📩 Un code de vérification vous a été envoyé par mail !")
+                            else:
+                                st.error("Impossible d'envoyer le mail. Vérifiez votre configuration Brevo.")
+
+            # --- CASE POUR ENTRER LE CODE DE VÉRIFICATION ---
+            if "temp_user" in st.session_state:
+                st.markdown("---")
+                st.markdown("### 🔑 Entrez le code reçu par mail")
+                
+                with st.form(key="form_verification_code"):
+                    code_saisi = st.text_input("Code à 6 chiffres :", placeholder="123456")
+                    bouton_valider_code = st.form_submit_button("Valider et créer le compte", use_container_width=True)
+                    
+                    if bouton_valider_code:
+                        if code_saisi == st.session_state.temp_user["code"]:
+                            sauvegarder_utilisateur(
+                                st.session_state.temp_user["id"],
+                                st.session_state.temp_user["email"],
+                                st.session_state.temp_user["password"]
+                            )
+                            st.success("🎉 Compte validé et créé avec succès ! Connectez-vous dans l'onglet Connexion.")
+                            del st.session_state.temp_user
+                        else:
+                            st.error("❌ Code incorrect. Réessayez.")
+
+        # --- BLOC AUTONOME INFORMATIONS TOUT EN BAS ---
+        st.markdown("<br>", unsafe_allow_html=True)
         with st.expander("ℹ️ En savoir plus sur Nairu (Informations)"):
             st.markdown("### 🚀 À propos de Nairu")
             st.write(
@@ -164,13 +215,17 @@ if st.session_state.statut_connexion == "Déconnecté":
                 "Un soir, on a eu l'idée un peu folle de créer l'outil ultime de recherche "
                 "tout en gardant vos données en parfaite sécurité. C'est comme ça que Nairu est né !"
             )
-            
             st.markdown("---")
-            
             st.markdown("### 🪲 Un problème ou un bug ?")
             st.write("Si vous rencontrez un problème technique ou si vous voulez nous faire un retour, signalez-le en DM :")
-            st.link_button(
-                "💬 Signaler un problème sur Instagram", 
-                "https://instagram.com/eliott31tls"
-            )
+            st.link_button("💬 Signaler un problème sur Instagram", "https://instagram.com/eliott31tls")
             st.caption("Auteur principal : @eliott31tls")
+
+# ==============================================================================
+# --- 5. INTERFACE UNE FOIS CONNECTÉ (À COMPLÉTER PLUS TARD) ---
+# ==============================================================================
+else:
+    st.write("Félicitations, tu es connecté à l'interface de Nairu ! Moteur prêt.")
+    if st.button("🔴 Déconnexion"):
+        st.session_state.statut_connexion = "Déconnecté"
+        st.rerun()
