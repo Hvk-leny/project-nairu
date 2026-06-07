@@ -781,3 +781,94 @@ if st.session_state.statut_connexion == "Déconnecté":
                         st.success("Compte enregistré ! En attente de validation.")
                     else:
                         st.error("Veuillez remplir tous les champs.")
+
+# ==============================================================================
+# --- EXTENSION MODIFIÉE : CONNEXION PREMIUM AVEC FORMULAIRE APPLE ---
+# ==============================================================================
+
+# Initialisation des états de connexion et des sous-menus
+if "statut_connexion" not in st.session_state:
+    st.session_state.statut_connexion = "Déconnecté"
+if "action_connexion" not in st.session_state:
+    st.session_state.action_connexion = "Menu Principal"
+
+if st.session_state.statut_connexion == "Déconnecté":
+    st.write("---")
+    
+    # 1. SI ON EST SUR LE MENU PRINCIPAL
+    if st.session_state.action_connexion == "Menu Principal":
+        st.markdown(
+            """
+            <div style="background: rgba(255, 255, 255, 0.75); padding: 30px; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.05); text-align: center; max-width: 450px; margin: 0 auto; box-shadow: 0 15px 35px rgba(0,0,0,0.08);">
+                <h2 style="color: #2c3e50; margin-top: 0; font-weight: 600;">Rejoindre Nairu AI</h2>
+                <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 25px;">Choisissez un mode de connexion</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        col_space1, col_center, col_space2 = st.columns([1, 2, 1])
+        
+        with col_center:
+            # BOUTON GOOGLE
+            st.markdown(
+                """
+                <div style="display: flex; align-items: center; justify-content: center; background-color: #ffffff; color: #5f6368; border: 1px solid #dadce0; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-family: -apple-system, sans-serif; font-size: 14px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;">
+                    <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" style="width: 18px; margin-right: 10px;">
+                    Continuer avec Google
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            
+            # BOUTON APPLE TRUQUÉ POUR AGIR COMME UN VRAI BOUTON STREAMLIT
+            if st.button("🍏 Continuer avec Apple", use_container_width=True):
+                st.session_state.action_connexion = "Connexion Apple"
+                st.rerun()
+
+            st.markdown("<p style='text-align: center; color: #7f8c8d; font-size: 12px; margin-vertical: 10px;'>— OU —</p>", unsafe_allow_html=True)
+
+            # FORMULAIRE MAIL CLASSIQUE
+            with st.expander("✉️ Continuer avec une adresse e-mail"):
+                choix_action = st.radio("Vous souhaitez :", ("Se connecter", "Créer un compte"), horizontal=True, key="radio_mail")
+                email_input = st.text_input("Adresse e-mail :", placeholder="exemple@mail.com", key="auth_email")
+                mdp_input = st.text_input("Mot de passe :", type="password", key="auth_mdp")
+                
+                if choix_action == "Se connecter":
+                    if st.button("🔑 Connexion", use_container_width=True):
+                        st.success(f"Connexion e-mail réussie pour {email_input}")
+                else:
+                    if st.button("✨ Créer mon compte", use_container_width=True):
+                        st.success("Compte e-mail créé !")
+
+    # 2. INTÉGRATION : SI L'UTILISATEUR A CLIQUÉ SUR APPLE
+    elif st.session_state.action_connexion == "Connexion Apple":
+        st.markdown(
+            """
+            <div style="background: #000000; padding: 30px; border-radius: 24px; text-align: center; max-width: 450px; margin: 0 auto; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+                <h2 style="color: #ffffff; margin-top: 0; font-weight: 600;">Connexion avec Apple ID</h2>
+                <p style="color: #a1a1a6; font-size: 14px; margin-bottom: 25px;">Utilisez votre identifiant Apple pour vous connecter à Nairu</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        col_space1, col_center, col_space2 = st.columns([1, 2, 1])
+        
+        with col_center:
+            st.write("")
+            apple_user = st.text_input("Identifiant Apple (Email) :", placeholder="nom@icloud.com", key="apple_email")
+            apple_mdp = st.text_input("Mot de passe d'application :", type="password", key="apple_password")
+            
+            if st.button("🔒 Se connecter au compte Apple", use_container_width=True):
+                if apple_user and apple_mdp:
+                    st.success(f"Compte Apple lié avec succès : {apple_user}")
+                    st.session_state.statut_connexion = "Connecté"
+                    st.session_state.action_connexion = "Menu Principal"
+                    st.rerun()
+                else:
+                    st.error("Veuillez remplir les informations Apple ID.")
+                    
+            if st.button("⬅️ Retour aux choix", use_container_width=True):
+                st.session_state.action_connexion = "Menu Principal"
+                st.rerun()
