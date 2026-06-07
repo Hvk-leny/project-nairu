@@ -704,3 +704,80 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# ==============================================================================
+# --- EXTENSION : ÉCRAN DE CONNEXION PREMIUM (APPLE, GOOGLE, EMAIL) ---
+# ==============================================================================
+
+# On s'assure que l'utilisateur est déconnecté pour afficher l'écran d'accueil
+if "statut_connexion" not in st.session_state:
+    st.session_state.statut_connexion = "Déconnecté"
+
+if st.session_state.statut_connexion == "Déconnecté":
+    st.write("---")
+    
+    # Conteneur central style carte flottante
+    st.markdown(
+        """
+        <div style="background: rgba(255, 255, 255, 0.75); padding: 30px; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.05); text-align: center; max-width: 450px; margin: 0 auto; box-shadow: 0 15px 35px rgba(0,0,0,0.08);">
+            <h2 style="color: #2c3e50; margin-top: 0; font-weight: 600;">Rejoindre Nairu AI</h2>
+            <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 25px;">Connectez-vous ou créez un compte pour commencer</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # Organisation des boutons au centre
+    col_space1, col_center, col_space2 = st.columns([1, 2, 1])
+    
+    with col_center:
+        # 1. BOUTON GOOGLE (HTML personnalisé pour le style original)
+        st.markdown(
+            """
+            <a href="#" style="text-decoration: none;">
+                <div style="display: flex; align-items: center; justify-content: center; background-color: #ffffff; color: #5f6368; border: 1px solid #dadce0; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-family: -apple-system, sans-serif; font-size: 14px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;">
+                    <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" style="width: 18px; margin-right: 10px;">
+                    Continuer avec Google
+                </div>
+            </a>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # 2. BOUTON APPLE
+        st.markdown(
+            """
+            <a href="#" style="text-decoration: none;">
+                <div style="display: flex; align-items: center; justify-content: center; background-color: #000000; color: #ffffff; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-family: -apple-system, sans-serif; font-size: 14px; margin-bottom: 20px; cursor: pointer;">
+                    <svg style="width: 16px; fill: white; margin-right: 10px;" viewBox="0 0 170 170">
+                        <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.34.13-9.13-1.78-14.36-5.75-3.72-2.87-7.72-7.71-11.97-14.52-7.5-11.96-12.87-24.99-16.12-39.09-3.25-14.1-3.25-26.68 0-37.73 3.12-10.74 8.24-19.39 15.36-25.96 7.11-6.57 15.11-9.87 24-9.9 4.35 0 9.21 1.22 14.58 3.66 5.38 2.44 8.78 3.66 10.21 3.66 1.12 0 4.61-1.28 10.48-3.84 5.87-2.56 10.73-3.75 14.58-3.57 15.48.87 27.11 6.57 34.91 17.11-14.23 8.61-21.2 20.2-20.91 34.78.29 11.39 4.41 20.89 12.35 28.48 8 7.58 17.41 11.72 28.25 12.43-1.63 4.76-3.87 9.56-6.72 14.39zm-31.25-115.82c0 8.36-3.1 16-9.31 22.91-6.2 6.9-13.52 11.08-21.94 12.54-.12-1.37-.18-2.5-.18-3.38 0-8.5 3.35-16.51 10.05-24 6.7-7.49 14.5-11.58 23.41-12.28.13 1.25.18 2.25.18 3.21z"/>
+                    </svg>
+                    Continuer avec Apple
+                </div>
+            </a>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown("<p style='text-align: center; color: #7f8c8d; font-size: 12px; margin-bottom: 15px;'>— OU —</p>", unsafe_allow_html=True)
+
+        # 3. OPTIONS MAIL (Formulaire Streamlit discret intégré)
+        with st.expander("✉️ Continuer avec une adresse e-mail"):
+            choix_action = st.radio("Vous souhaitez :", ("Se connecter", "Créer un compte"), horizontal=True)
+            
+            email_input = st.text_input("Adresse e-mail :", placeholder="exemple@mail.com", key="auth_email")
+            mdp_input = st.text_input("Mot de passe :", type="password", key="auth_mdp")
+            
+            if choix_action == "Se connecter":
+                if st.button("🔑 Connexion", use_container_width=True):
+                    if email_input and mdp_input:
+                        st.success(f"Tentative de connexion pour {email_input}...")
+                        # Ici se mettra la logique de vérification plus tard
+                    else:
+                        st.error("Veuillez remplir tous les champs.")
+            else:
+                if st.button("✨ Créer mon compte", use_container_width=True):
+                    if email_input and mdp_input:
+                        st.success("Compte enregistré ! En attente de validation.")
+                    else:
+                        st.error("Veuillez remplir tous les champs.")
