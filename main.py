@@ -469,13 +469,13 @@ if st.session_state.statut_connexion == "Invité":
         st.rerun()
 
 # ==============================================================================
-# --- EXTENSION : THÈME LUXE MARBRE BLANC & SIDEBAR AUTO-HIDE ---
+# --- LE TOUT NOUVEAU STYLE : LUXE MARBRE BLANC & SIDEBAR GLISSANTE ---
 # ==============================================================================
 
 st.markdown(
     """
     <style>
-    /* 1. Fond d'écran type Marbre Blanc Réaliste */
+    /* 1. Fond d'écran type Marbre Blanc */
     .stApp {
         background-color: #f4f5f6 !important;
         background-image: 
@@ -486,7 +486,7 @@ st.markdown(
         background-attachment: fixed !important;
     }
 
-    /* 2. Barre de recherche flottante avec une vraie tâche d'ombre portée */
+    /* 2. Barre de recherche flottante avec tâche d'ombre portée */
     div[data-testid="stChatInput"] {
         border-radius: 24px !important;
         border: 1px solid rgba(0, 0, 0, 0.08) !important;
@@ -500,14 +500,14 @@ st.markdown(
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18) !important;
     }
 
-    /* 3. EFFET MAGIQUE : La barre latérale s'ouvre quand on approche la souris */
+    /* 3. Barre latérale cachée qui s'ouvre quand on approche la souris */
     [data-testid="stSidebar"] {
         position: fixed !important;
-        left: -290px !important; /* Cache la barre par défaut */
+        left: -290px !important;
         top: 0 !important;
         bottom: 0 !important;
         width: 320px !important;
-        background-color: rgba(255, 255, 255, 0.9) !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
         backdrop-filter: blur(15px) !important;
         -webkit-backdrop-filter: blur(15px) !important;
         border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
@@ -516,29 +516,27 @@ st.markdown(
         padding-left: 20px !important;
     }
 
-    /* Zone invisible sur le bord gauche de l'écran pour capter le survol de la souris */
+    /* Détecteur de survol pour la souris sur le bord gauche */
     [data-testid="stSidebar"]::before {
         content: "" !important;
         position: absolute !important;
         top: 0 !important;
-        right: -30px !important; /* Dépasse sur l'écran principal pour capter la souris */
+        right: -30px !important;
         width: 40px !important;
         height: 100% !important;
         background: transparent !important;
     }
 
-    /* Quand la souris approche du bord ou survole la sidebar, elle glisse vers la droite */
     [data-testid="stSidebar"]:hover {
         left: 0 !important;
         box-shadow: 15px 0 40px rgba(0, 0, 0, 0.08) !important;
     }
 
-    /* Ajustement de l'icône de fermeture native de Streamlit pour ne pas gêner */
     [data-testid="stSidebarCollapseButton"] {
         display: none !important;
     }
 
-    /* 4. Bulles de message style épuré "Art Gallery" */
+    /* 4. Bulles de message épurées */
     .stChatMessage {
         background-color: rgba(255, 255, 255, 0.7) !important;
         backdrop-filter: blur(5px) !important;
@@ -553,5 +551,30 @@ st.markdown(
         border: 1px solid rgba(0, 0, 0, 0.08) !important;
     }
 
-    /* 5. Typographie et Text
-    st.session_state.lando_boot = True
+    /* 5. Textes et titres minimalistes */
+    h1, h2, h3, h4, p, span, label, li {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        color: #2c3e50 !important;
+    }
+    
+    h1, h2, h3 {
+        font-weight: 600 !important;
+    }
+
+    /* Boutons de l'interface */
+    .stButton>button {
+        background-color: #ffffff !important;
+        color: #2c3e50 !important;
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+        border-radius: 10px !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .stButton>button:hover {
+        background-color: #2c3e50 !important;
+        color: #ffffff !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
