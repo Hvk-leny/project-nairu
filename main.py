@@ -213,3 +213,36 @@ if 'prompt' in locals() and prompt:
             
     except Exception as e:
         st.error(f"Erreur Nairu (Groq) : {e}")
+
+# --- AFFICHAGE DE L'HEURE EN BAS À DROITE ---
+import datetime
+
+# Récupération de l'heure actuelle
+heure_actuelle = datetime.datetime.now().strftime("%H:%M")
+
+# Injection de HTML/CSS pour fixer l'affichage en bas à droite
+st.markdown(
+    f"""
+    <style>
+    .horloge-fixe {{
+        position: fixed;
+        bottom: 10px;
+        right: 15px;
+        background-color: rgba(30, 30, 30, 0.8);
+        color: #ffffff;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 14px;
+        font-weight: bold;
+        z-index: 9999;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        pointer-events: none;
+    }}
+    </style>
+    <div class="horloge-fixe">
+        🕒 {heure_actuelle}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
