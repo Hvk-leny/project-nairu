@@ -383,3 +383,60 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# ==============================================================================
+# --- EXTENSION : CANAL DE COMMUNICATION PRIVÉ (ELIOTT & LENY) ---
+# ==============================================================================
+
+st.sidebar.write("---")
+st.sidebar.subheader("📡 Canal Équipe")
+
+# Initialisation de la boîte de réception dans la mémoire du site
+if "messages_equipe" not in st.session_state:
+    st.session_state.messages_equipe = [
+        {"auteur": "Système", "texte": "Bienvenue dans le canal privé de Nairu Dev.", "heure": "00:00"}
+    ]
+
+# Sélection de l'utilisateur qui parle
+qui_parle = st.sidebar.selectbox("Tu es :", ("Eliott", "Leny"))
+
+# Zone pour taper le message dans la barre latérale
+texte_message = st.sidebar.text_input("💬 Message pour ton binôme :", key="input_equipe")
+
+if st.sidebar.button("🚀 Envoyer à l'équipe", use_container_width=True):
+    if texte_message:
+        # Récupération de l'heure locale française
+        from zoneinfo import ZoneInfo
+        import datetime
+        heure_fr = datetime.datetime.now(ZoneInfo("Europe/Paris")).strftime("%H:%M")
+        
+        # Ajout du message dans la liste
+        st.session_state.messages_equipe.append({
+            "auteur": qui_parle,
+            "texte": texte_message,
+            "heure": heure_fr
+        })
+        st.rerun()
+
+# Bouton pour afficher la boîte de réception à l'écran
+if st.sidebar.checkbox("📂 Ouvrir la radio d'équipe"):
+    st.write("---")
+    st.subheader("📟 Messages internes (Eliott 🤝 Leny)")
+    
+    # Affichage des messages du plus récent au plus ancien
+    for msg in reversed(st.session_state.messages_equipe):
+        if msg["auteur"] == "Système":
+            st.caption(f"⚙️ {msg['texte']}")
+        else:
+            couleur = "#00b4d8" if msg["auteur"] == "Eliott" else "#ffb703"
+            st.markdown(
+                f"""
+                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid {couleur};">
+                    <span style="color: {couleur}; font-weight: bold;">{msg['auteur']}</span> 
+                    <span style="color: gray; font-size: 10px;">[{msg['heure']}]</span><br>
+                    <span style="color: #ffffff;">{msg['texte']}</span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            
