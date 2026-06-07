@@ -122,41 +122,44 @@ else:
 # --- CONFIGURATION GEMINI ET INTERFACE ---
 # Activation de ta clé API Gemini
 import google.generativeai as genai
-genai.configure(api_key="AQ.Ab8RN6KqmDWeAQNop2WUxrlaTUvgIROB9Bh8kjX-UwT1dJRS7w")
+genai.configure(api_key="AQ.Ab8RN6KP8ocy7XzsvOLZT0jdqFN8WwywA2ANOtBJqvpBZyWTvQ")
 
 # Création du menu dans la barre latérale
 st.sidebar.title("⚡ Configuration du Néron")
 option = st.sidebar.radio(
     "Choisis le mode de fonctionnement :",
-    ("Option Flash ⚡", "Option Réflexion 🧠", "Option Passionné / Intéressé 🔥")
+    ("Option Flash ⚡", "Option Réflexion 💬", "Option Passionné / Intéressé 🔥")
 )
 
 # Réglage du comportement du Néron selon l'option choisie
 if option == "Option Flash ⚡":
     st.sidebar.info("Mode Flash : Réponses courtes et ultra rapides.")
     system_instruction = "Tu es Néron. Réponds de manière ultra rapide, concise, claire et directe, va droit au but."
-    model_name = "models/gemini-1.5-flash"
-    
-elif option == "Option Réflexion 🧠":
+    model_name = "models/gemini-2.0-flash"
+
+elif option == "Option Réflexion 💬":
     st.sidebar.info("Mode Réflexion : Analyse profonde et structurée.")
     system_instruction = "Tu es Néron. Prends le temps de bien analyser. Donne une réponse très détaillée, logique, technique et approfondie."
-    model_name = "gemini-1.5-flash" # Modèle plus puissant pour la réflexion
-    
+    model_name = "models/gemini-2.0-pro"
+
 elif option == "Option Passionné / Intéressé 🔥":
     st.sidebar.info("Mode Passionné : Expert auto à 100% !")
-    system_instruction = "Tu es Néron, un expert automobile absolu. Réponds avec énormément d'enthousiasme et de passion. Utilise un ton dynamique et fais des parallèles avec la mécanique, la prépa ou la haute performance (moteurs comme le B58, châssis) dès que possible."
-    model_name = "gemini-1.5-flash"
-# ----------------------------------------
+    system_instruction = "Tu es Néron, un expert automobile absolu. Réponds avec énormément d'enthousiasme et de passion. Utilise un ton de connaisseur."
+    model_name = "models/gemini-2.0-flash"
+
 # --- APPEL À GEMINI ---
 if 'prompt' in locals() and prompt:
-     try:
-         model = genai.GenerativeModel(
-             model_name=model_name,
-             system_instruction=system_instruction
-         )
-         response = model.generate_content(prompt)
-     except Exception as e:
-         st.error(f"Erreur Gemini : {e}")
+    try:
+        model = genai.GenerativeModel(
+            model_name=model_name,
+            system_instruction=system_instruction
+        )
+        response = model.generate_content(prompt)
+        st.write(response.text)
+    except Exception as e:
+        st.error(f"Erreur Gemini : {e}")
+         
+       
     
 
     
