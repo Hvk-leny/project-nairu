@@ -85,7 +85,11 @@ if st.session_state.statut_connexion == "Déconnecté":
     
     col_x1, col_form, col_x2 = st.columns([1, 2, 1])
     with col_form:
-        tab_login, tab_guest = st.tabs(["🔒 Connexion "])
+        # On affiche directement le formulaire de connexion sans onglets autour
+st.markdown("### 🔒 Connexion")
+
+# Ici, tu laisses ton code existant qui gère la connexion 
+# (les champs st.text_input pour l'identifiant, le mot de passe, et le bouton)
         
         with tab_login:
             st.write("")
