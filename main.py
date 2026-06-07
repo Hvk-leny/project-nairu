@@ -196,12 +196,10 @@ if st.session_state.statut_connexion == "Déconnecté":
             with col_eliott:
                 st.markdown("**⭐ Eliott**")
                 st.link_button("📸 Instagram d'Eliott", "https://instagram.com/eliott31tls", use_container_width=True)
-                st.link_button("🎵 TikTok d'Eliott", "https://tiktok.com/@eliott31tls", use_container_width=True)
                 
             with col_leny:
                 st.markdown("**⚡ Leny**")
                 st.link_button("📸 Instagram de Leny", "https://instagram.com/ton_pseudo_instagram", use_container_width=True)
-                st.link_button("🎵 TikTok de Leny", "https://tiktok.com/@ton_pseudo_tiktok", use_container_width=True)
                 
             st.markdown("---")
             st.markdown("### 🪲 Un problème ou un bug ?")
