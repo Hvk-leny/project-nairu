@@ -89,6 +89,44 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+        color: #e2e8f0 !important;
+        border-radius: 30px !important;
+        border: 1px solid rgba(0, 240, 255, 0.2) !important;
+        padding: 14px 24px !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+        transition: border-color 0.3s ease !important;
+    }
+    div[data-testid="stChatInput"] textarea:focus {
+        border-color: #00f0ff !important;
+    }
+
+    /* Typographies et titres */
+    h1, h2, h3, h4, p, span, label, li {
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+        color: #cbd5e1 !important;
+    }
+    h1, h2, h3 {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+
+    /* Boutons Tech */
+    .stButton>button {
+        background-color: #151d30 !important;
+        color: #00f0ff !important;
+        border: 1px solid rgba(0, 240, 255, 0.3) !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+    }
+    .stButton>button:hover {
+        background-color: #00f0ff !important;
+        color: #070a10 !important;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.4) !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
     h1, h2, h3 { color: #ffffff !important; font-weight: 600 !important; }
     .stButton>button { background-color: #21262d !important; color: #c9d1d9 !important; border: 1px solid #30363d !important; border-radius: 6px !important; }
     .stButton>button:hover { background-color: #30363d !important; color: #ffffff !important; }
