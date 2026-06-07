@@ -234,34 +234,32 @@ st.markdown(
 # --- STRUCTURE DE L'ÉCRAN : ZONE PRINCIPALE À GAUCHE / TASKBAR À DROITE ---
 # ==============================================================================
 
-# On crée 2 colonnes : la 1ère prend 80% de l'écran (Discussion), la 2ème prend 20% (Taskbar)
+# On sépare l'écran en 2 colonnes (80% pour le chat, 20% pour la barre de droite)
 col_discussion, col_taskbar = st.columns([4, 1])
 
 # --- 1. ZONE DE DISCUSSION (À GAUCHE) ---
 with col_discussion:
     st.title("💬 Discussion 1")
     
-    # Remets ici ton code existant qui affiche les messages et le st.chat_input()
-    # Exemple :
-    # container = st.container()
-    # ...
+    # C'est ICI et UNIQUEMENT ici que doit se trouver ton affichage de messages
+    # (Supprime bien le st.chat_input qui traînait tout seul ailleurs dans le fichier)
     st.chat_input("Écris ton message ici...")
 
 # --- 2. NOUVELLE TASKBAR (À DROITE) ---
 with col_taskbar:
-    # On ajoute un petit style de conteneur épuré pour bien séparer la zone
     st.markdown("### 🛠️ Paramètres IA")
     
-    # Tu peux déplacer ici tes options existantes :
     pipeline = st.radio(
         "Pipeline :",
-        ["Option Flash ⚡", "Option Réflexion 💬", "Option Passionné 🔥"]
+        ["Option Flash ⚡", "Option Réflexion 💬", "Option Passionné 🔥"],
+        key="pipeline_droite" # Une clé unique pour éviter tout autre conflit
     )
     
-    internet = st.toggle("🌐 Interroger Internet", value=True)
-    
-    creativite = st.slider("☁️ Créativité :", 0.0, 1.0, 0.50)
+    internet = st.toggle("🌐 Interroger Internet", value=True, key="internet_droite")
+    creativite = st.slider("☁️ Créativité :", 0.0, 1.0, 0.50, key="slider_droite")
     
     st.markdown("---")
+    st.markdown("### ⏳ Confidentialité")
+    mode_ephemere = st.toggle("🗑️ Mode Éphémère (72h)", key="ephemere_droite")
     st.markdown("### ⏳ Confidentialité")
     mode_ephemere = st.toggle("🗑️ Mode Éphémère (72h)")
