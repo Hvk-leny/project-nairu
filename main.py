@@ -102,7 +102,7 @@ if st.session_state.statut_connexion == "Déconnecté":
                 else:
                     st.error("❌ Identifiant non reconnu.")
                     if st.session_state.statut_connexion == "Déconnecté":
-                    st.title("Connexion à Nairu")
+                         st.title("Connexion à Nairu")
     
     
 
