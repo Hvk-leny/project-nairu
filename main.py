@@ -2,51 +2,30 @@ import streamlit as st
 import json
 import os
 import requests
-import random
 from groq import Groq
 
 # ==============================================================================
-# --- 1. FONCTION D'ENVOI DE MAIL VIA BREVO ---
-# ==============================================================================
-def envoyer_code_verification(email_destinataire):
-    code = str(random.randint(100000, 999999))
-    url = "https://api.brevo.com/v3/smtp/email"
-    
-    headers = {
-        "accept": "application/json",
-        "api-key": "xsmtpsib-4b98b43cd2774b9811ba0e6b91e919eb2cda02083eba9f1299ce8b51ae44ae05-OlOkVkE5bCGgzZt3",
-        "content-type": "application/json"
-    }
-    
-    data = {
-        "sender": {"name": "Nairu AI", "email": "nairu.ia.toulouse@outlook.com"},
-        "to": [{"email": email_destinataire}],
-        "subject": "🔑 Code de vérification Nairu",
-        "textContent": f"Bonjour,\n\nVoici votre code de vérification pour finaliser la création de votre compte Nairu :\n\n👉 {code}\n\nL'email sert uniquement à la création du compte. Pour vous connecter, utilisez votre identifiant et votre mot de passe.\n\nL'équipe Nairu (Eliott & Leny)"
-    }
-    
-    try:
-        response = requests.post(url, json=data, headers=headers)
-        if response.status_code == 201:
-            return code
-        else:
-            print(f"Erreur Brevo : {response.text}")
-            return None
-    except Exception as e:
-        print(f"Erreur connexion : {e}")
-        return None
-
-# ==============================================================================
-# --- 2. FONCTIONS DE LA BASE DE DONNÉES JSON ---
+# --- 1. FONCTIONS DE LA BASE DE DONNÉES JSON (AVEC SÉCURITÉ IP) ---
 # ==============================================================================
 DB_FILE = "utilisateurs.json"
 
+# Fonction magique et ultra-rapide pour choper l'IP de l'utilisateur
+def recuperer_ip_visiteur():
+    try:
+        # On interroge un mini-service gratuit qui renvoie juste l'IP publique
+        reponse = requests.get("https://api.ipify.org?format=json", timeout=3)
+        return reponse.json().get("ip")
+    except:
+        return "127.0.0.1" # IP de secours si le service est indisponible
+
 def charger_utilisateurs():
     if not os.path.exists(DB_FILE):
+        # Compte exemple d'origine avec une fausse IP pour la structure
         default_db = {
             "exemple": {
                 "email": "exemple@nairu.com",
-                "password": "exemple"
+                "password": "exemple",
+                "ip": "0.0.0.0"
             }
         }
         with open(DB_FILE, "w", encoding="utf-8") as f:
@@ -54,32 +33,31 @@ def charger_utilisateurs():
         return default_db
     try:
         with open(DB_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            if data and "exemple" in data and isinstance(data["exemple"], str):
-                raise ValueError("Ancienne structure")
-            return data
+            return json.load(f)
     except:
-        default_db = {
-            "exemple": {
-                "email": "exemple@nairu.com",
-                "password": "exemple"
-            }
-        }
-        with open(DB_FILE, "w", encoding="utf-8") as f:
-            json.dump(default_db, f, indent=4)
-        return default_db
+        return {}
 
-def sauvegarder_utilisateur(username, email, password):
+def sauvegarder_utilisateur(username, email, password, ip_address):
     comptes = charger_utilisateurs()
     comptes[username] = {
         "email": email,
-        "password": password
+        "password": password,
+        "ip": ip_address # On enregistre son IP précieusement
     }
     with open(DB_FILE, "w", encoding="utf-8") as f:
         json.dump(comptes, f, indent=4)
 
+# Fonction pour vérifier si une IP a déjà créé un compte sur le site
+def ip_deja_utilisee(ip_address):
+    comptes = charger_utilisateurs()
+    for nom, infos in comptes.items():
+        # Si l'IP existe déjà et que ce n'est pas le compte admin "exemple"
+        if infos.get("ip") == ip_address and nom != "exemple":
+            return True
+    return False
+
 # ==============================================================================
-# --- 3. MISE EN PAGE & LOGIQUE DES SESSIONS ---
+# --- 2. MISE EN PAGE & LOGIQUE DES SESSIONS ---
 # ==============================================================================
 st.set_page_config(
     page_title="NAIRU - AI",
@@ -118,7 +96,7 @@ if "statut_connexion" not in st.session_state:
     st.session_state.statut_connexion = "Déconnecté"
 
 # ==============================================================================
-# --- 4. INTERFACE DE CONNEXION / INSCRIPTION ---
+# --- 3. INTERFACE DE CONNEXION / INSCRIPTION ---
 # ==============================================================================
 if st.session_state.statut_connexion == "Déconnecté":
     
@@ -146,13 +124,14 @@ if st.session_state.statut_connexion == "Déconnecté":
                         else:
                             st.error("Identifiant ou mot de passe incorrect.")
             
-            # --- ONGLET 2 : CRÉATION DE COMPTE ---
+            # --- ONGLET 2 : CRÉATION DE COMPTE (SÉCURISÉ PAR IP) ---
             with tab_register:
                 st.markdown("### Créer un compte")
                 st.markdown(
                     """
                     > ⚠️ **Note importante :** > * Pour vous connecter, utilisez votre **identifiant** et votre **mot de passe**.  
-                    > * L'**email** sert uniquement à la création du compte.
+                    > * L'**email** sert uniquement à la création du compte.  
+                    > * *Système anti-spam : Une seule création de compte est autorisée par connexion internet (IP).*
                     """
                 )
                 
@@ -164,47 +143,25 @@ if st.session_state.statut_connexion == "Déconnecté":
                     
                     if bouton_inscription:
                         base_comptes = charger_utilisateurs()
+                        
+                        # Étape 1 : On récupère l'IP du visiteur en direct
+                        with st.spinner("Vérification de sécurité..."):
+                            user_ip = recuperer_ip_visiteur()
+                        
+                        # Étape 2 : Les vérifications de sécurité
                         if nouvel_identifiant.strip() == "" or nouvel_email.strip() == "" or nouveau_code.strip() == "":
                             st.warning("Veuillez remplir tous les champs.")
                         elif "@" not in nouvel_email or "." not in nouvel_email:
                             st.error("Veuillez entrer une adresse email valide.")
                         elif nouvel_identifiant in base_comptes:
                             st.error("Cet identifiant existe déjà !")
+                        elif ip_deja_utilisee(user_ip):
+                            # 🔥 LA SÉCURITÉ MAGIQUE : On bloque si l'IP a déjà servi !
+                            st.error("❌ Sécurité : Un compte a déjà été créé avec votre connexion internet.")
                         else:
-                            with st.spinner("Envoi du code de vérification par mail..."):
-                                code_envoye = envoyer_code_verification(nouvel_email)
-                                
-                            if code_envoye:
-                                st.session_state.temp_user = {
-                                    "id": nouvel_identifiant,
-                                    "email": nouvel_email,
-                                    "password": nouveau_code,
-                                    "code": code_envoye
-                                }
-                                st.success("📩 Un code de vérification vous a été envoyé par mail !")
-                            else:
-                                st.error("Impossible d'envoyer le mail. Vérifiez votre configuration Brevo.")
-
-            # --- CASE POUR ENTRER LE CODE DE VÉRIFICATION ---
-            if "temp_user" in st.session_state:
-                st.markdown("---")
-                st.markdown("### 🔑 Entrez le code reçu par mail")
-                
-                with st.form(key="form_verification_code"):
-                    code_saisi = st.text_input("Code à 6 chiffres :", placeholder="123456")
-                    bouton_valider_code = st.form_submit_button("Valider et créer le compte", use_container_width=True)
-                    
-                    if bouton_valider_code:
-                        if code_saisi == st.session_state.temp_user["code"]:
-                            sauvegarder_utilisateur(
-                                st.session_state.temp_user["id"],
-                                st.session_state.temp_user["email"],
-                                st.session_state.temp_user["password"]
-                            )
-                            st.success("🎉 Compte validé et créé avec succès ! Connectez-vous dans l'onglet Connexion.")
-                            del st.session_state.temp_user
-                        else:
-                            st.error("❌ Code incorrect. Réessayez.")
+                            # Tout est OK, on enregistre l'IP avec le reste dans le JSON
+                            sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code, user_ip)
+                            st.success("🎉 Compte créé avec succès ! Vous pouvez maintenant vous connecter.")
 
         # --- BLOC AUTONOME INFORMATIONS TOUT EN BAS ---
         st.markdown("<br>", unsafe_allow_html=True)
@@ -222,7 +179,7 @@ if st.session_state.statut_connexion == "Déconnecté":
             st.caption("Auteur principal : @eliott31tls")
 
 # ==============================================================================
-# --- 5. INTERFACE UNE FOIS CONNECTÉ (À COMPLÉTER PLUS TARD) ---
+# --- 4. INTERFACE UNE FOIS CONNECTÉ ---
 # ==============================================================================
 else:
     st.write("Félicitations, tu es connecté à l'interface de Nairu ! Moteur prêt.")
