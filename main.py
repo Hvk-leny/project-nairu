@@ -584,3 +584,33 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# ==============================================================================
+# --- CORRECTIF : ALIGNEMENT DU TEXTE DES BULLES (ANTI-CHEVAUCHEMENT) ---
+# ==============================================================================
+
+st.markdown(
+    """
+    <style>
+    /* Force le conteneur du message à s'organiser proprement en ligne */
+    [data-testid="stChatMessage"] {
+        display: flex !important;
+        align-items: center !important;
+        gap: 15px !important; /* Crée un espace de sécurité entre l'avatar et le texte */
+    }
+
+    /* Empêche les textes de l'icône et du message de se marcher dessus */
+    [data-testid="stChatMessage"] .stMarkdown {
+        padding-left: 10px !important;
+        margin: 0 !important;
+        display: inline-block !important;
+    }
+    
+    /* Nettoyage des résidus de texte parasites en arrière-plan */
+    [data-testid="stChatMessageContent"] {
+        margin-left: 5px !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
