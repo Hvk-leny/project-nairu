@@ -469,110 +469,89 @@ if st.session_state.statut_connexion == "Invité":
         st.rerun()
 
 # ==============================================================================
-# --- EXTENSION : CHARTE GRAPHIQUE OFFICIELLE SITE LANDO NORRIS (LN5 STYLE) ---
+# --- EXTENSION : THÈME LUXE MARBRE BLANC & SIDEBAR AUTO-HIDE ---
 # ==============================================================================
 
 st.markdown(
     """
     <style>
-    /* 1. Fond d'écran signature : Noir mat pur du site de Lando */
+    /* 1. Fond d'écran type Marbre Blanc Réaliste */
     .stApp {
-        background-color: #111112 !important;
-        background-image: radial-gradient(circle at 80% 20%, rgba(210, 255, 0, 0.05) 0%, transparent 40%), 
-                          radial-gradient(circle at 20% 80%, rgba(0, 0, 0, 0.9) 0%, transparent 60%) !important;
-        background-attachment: fixed;
+        background-color: #f4f5f6 !important;
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)),
+            url('https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=2070&auto=format&fit=crop') !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-attachment: fixed !important;
     }
 
-    /* 2. Bulles de message style LN : Minimalistes, sombres, et liseré jaune néon */
-    .stChatMessage {
-        background-color: #1a1a1c !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        border-radius: 12px !important;
-        padding: 16px !important;
-        margin-bottom: 14px !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
-        transition: border 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    /* Quand Nairu (l'I.A.) parle : Effet Néon Jaune/Vert de Lando */
-    .stChatMessage[data-testid="stChatMessageAssistant"] {
-        border-left: 4px solid #D2FF00 !important;
-    }
-
-    /* Quand l'utilisateur parle : Style épuré avec surlignage blanc sport */
-    .stChatMessage[data-testid="stChatMessageUser"] {
-        background-color: #222225 !important;
-        border-left: 4px solid #ffffff !important;
-    }
-
-    /* 3. Barre latérale (HUD) : Look carbone sombre et ligne jaune fluo directionnelle */
-    [data-testid="stSidebar"] {
-        background-color: #0c0c0d !important;
-        border-right: 2px solid #D2FF00 !important;
-    }
-
-    /* 4. Boutons ultra-performance style Lando Norris Store */
-    .stButton>button {
-        background-color: #1a1a1c !important;
-        color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 8px !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 1px !important;
-        font-size: 13px !important;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    }
-
-    .stButton>button:hover {
-        background-color: #D2FF00 !important;
-        color: #111112 !important;
-        border: 1px solid #D2FF00 !important;
-        box-shadow: 0 0 20px rgba(210, 255, 0, 0.4) !important;
-        transform: translateY(-1px);
-    }
-
-    /* 5. Sliders et curseurs aux couleurs de l'écurie LN */
-    div[data-testid="stSlider"] [data-testid="stThumb"] {
-        background-color: #D2FF00 !important;
-        box-shadow: 0 0 10px rgba(210, 255, 0, 0.5) !important;
-        border-radius: 50% !important;
-    }
-    
-    div[data-testid="stSlider"] [data-testid="stTrack"] {
-        background-color: rgba(210, 255, 0, 0.2) !important;
-    }
-
-    /* 6. Typographie : Moderne, épurée et agressive (Style Mona Sans / Apple) */
-    h1, h2, h3, h4, p, span, label, li {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
-        color: #efeff1 !important;
-        -webkit-font-smoothing: antialiased;
-    }
-
-    /* Titres en gras et surlignage de couleur fluo pour les sections importantes */
-    h1, h2, h3 {
-        font-weight: 800 !important;
-        color: #ffffff !important;
-    }
-    
-    .stSidebar subheader {
-        color: #D2FF00 !important;
-    }
-
-    /* Customisation de la barre d'input de texte */
+    /* 2. Barre de recherche flottante avec une vraie tâche d'ombre portée */
     div[data-testid="stChatInput"] {
-        border-radius: 12px !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        background-color: #1a1a1c !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.06) !important;
+        transition: transform 0.3s ease, box-shadow 0.3s ease !important;
     }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+    
+    div[data-testid="stChatInput"]:focus-within {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18) !important;
+    }
 
-# Notification de boot typée F1 / Télémétrie
-if 'lando_boot' not in st.session_state:
-    st.toast("LN5 Engine Initialized. Radio Check OK. Ready to Push.", icon="🏎️")
+    /* 3. EFFET MAGIQUE : La barre latérale s'ouvre quand on approche la souris */
+    [data-testid="stSidebar"] {
+        position: fixed !important;
+        left: -290px !important; /* Cache la barre par défaut */
+        top: 0 !important;
+        bottom: 0 !important;
+        width: 320px !important;
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(15px) !important;
+        -webkit-backdrop-filter: blur(15px) !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
+        transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 999991 !important;
+        padding-left: 20px !important;
+    }
+
+    /* Zone invisible sur le bord gauche de l'écran pour capter le survol de la souris */
+    [data-testid="stSidebar"]::before {
+        content: "" !important;
+        position: absolute !important;
+        top: 0 !important;
+        right: -30px !important; /* Dépasse sur l'écran principal pour capter la souris */
+        width: 40px !important;
+        height: 100% !important;
+        background: transparent !important;
+    }
+
+    /* Quand la souris approche du bord ou survole la sidebar, elle glisse vers la droite */
+    [data-testid="stSidebar"]:hover {
+        left: 0 !important;
+        box-shadow: 15px 0 40px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    /* Ajustement de l'icône de fermeture native de Streamlit pour ne pas gêner */
+    [data-testid="stSidebarCollapseButton"] {
+        display: none !important;
+    }
+
+    /* 4. Bulles de message style épuré "Art Gallery" */
+    .stChatMessage {
+        background-color: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: blur(5px) !important;
+        border: 1px solid rgba(0, 0, 0, 0.04) !important;
+        border-radius: 16px !important;
+        color: #222222 !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02) !important;
+    }
+
+    .stChatMessage[data-testid="stChatMessageUser"] {
+        background-color: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    }
+
+    /* 5. Typographie et Text
     st.session_state.lando_boot = True
