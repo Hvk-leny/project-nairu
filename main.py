@@ -82,3 +82,71 @@ st.markdown(
 
 # Ton grand titre d'accueil
 st.title("bienvenue sur nairu")
+# ==============================================================================
+# --- 3. LOGIQUE DES SESSIONS ET INTERFACE DE CONNEXION ---
+# ==============================================================================
+
+# On initialise le statut de connexion s'il n'existe pas encore
+if "statut_connexion" not in st.session_state:
+    st.session_state.statut_connexion = "Déconnecté"
+
+# Si l'utilisateur est déconnecté, on affiche le rectangle de connexion au centre
+if st.session_state.statut_connexion == "Déconnecté":
+    
+    # On crée 3 colonnes pour centrer le rectangle au milieu de l'écran (largeur 1/2/1)
+    col_gauche, col_centre, col_droite = st.columns([1, 2, 1])
+    
+    with col_centre:
+        # On ouvre un cadre visuel propre (un container) pour simuler le rectangle de l'interface
+        with st.container(border=True):
+            
+            # Création des deux onglets à l'intérieur du rectangle
+            tab_login, tab_register = st.tabs(["🔒 Connexion", "✨ Créer un compte"])
+            
+            # --- STRUCTURE DE L'ONGLET 1 : CONNEXION ---
+            with tab_login:
+                st.markdown("### Connexion")
+                base_comptes = charger_utilisateurs()
+                
+                with st.form(key="form_connexion"):
+                    identifiant = st.text_input("Identifiant ou Prénom :", placeholder="exemple", key="login_username")
+                    code_secret = st.text_input("Code secret :", type="password", placeholder="exemple", key="login_password")
+                    bouton_connexion = st.form_submit_button("Se connecter", use_container_width=True)
+                    
+                    if bouton_connexion:
+                        if identifiant in base_comptes and base_comptes[identifiant]["password"] == code_secret:
+                            st.session_state.statut_connexion = "Connecté"
+                            st.success(f"Bienvenue {identifiant} !")
+                            st.rerun()
+                        else:
+                            st.error("Identifiant ou mot de passe incorrect.")
+            
+            # --- STRUCTURE DE L'ONGLET 2 : CRÉATION DE COMPTE ---
+            with tab_register:
+                st.markdown("### Créer un compte")
+                
+                # Bloc d'explication obligatoire
+                st.markdown(
+                    """
+                    > ⚠️ **Note importante :** > * Pour vous connecter, utilisez votre **identifiant** et votre **mot de passe**.  
+                    > * L'**email** sert uniquement à la création du compte.
+                    """
+                )
+                
+                with st.form(key="form_inscription"):
+                    nouvel_identifiant = st.text_input("Choisis un identifiant :", key="reg_username")
+                    nouvel_email = st.text_input("Adresse Email :", placeholder="votre@email.com", key="reg_email")
+                    nouveau_code = st.text_input("Choisis un code secret :", type="password", key="reg_password")
+                    bouton_inscription = st.form_submit_button("Créer mon compte", use_container_width=True)
+                    
+                    if bouton_inscription:
+                        base_comptes = charger_utilisateurs()
+                        if nouvel_identifiant.strip() == "" or nouvel_email.strip() == "" or nouveau_code.strip() == "":
+                            st.warning("Veuillez remplir tous les champs.")
+                        elif "@" not in nouvel_email or "." not in nouvel_email:
+                            st.error("Veuillez entrer une adresse email valide.")
+                        elif nouvel_identifiant in base_comptes:
+                            st.error("Cet identifiant existe déjà !")
+                        else:
+                            sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code)
+                            st.success("🎉 Compte créé ! Connecte-toi dans l'onglet d'à côté.")
