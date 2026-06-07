@@ -216,7 +216,7 @@ else:
 st.markdown(
     """
     <style>
-    /* 1. ON FORCE LE CONTENEUR DU BOUTON À REPAREÎTRE CORECTEMENT */
+    /* 1. FORCE LE CONTENEUR DU BOUTON À REPARAÎTRE */
     [data-testid="stSidebarCollapseButton"] {
         display: block !important;
         visibility: visible !important;
@@ -274,7 +274,5 @@ st.markdown(
     }
     </style>
     """,
-    unsafe_allow_html=True
-)
     unsafe_allow_html=True
 )
