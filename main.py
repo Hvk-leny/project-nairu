@@ -872,3 +872,71 @@ if st.session_state.statut_connexion == "Déconnecté":
             if st.button("⬅️ Retour aux choix", use_container_width=True):
                 st.session_state.action_connexion = "Menu Principal"
                 st.rerun()
+
+# ==============================================================================
+# --- EXTENSION CONFORME : CONNEXION & CRÉATION DE COMPTE (NOM & MDP) ---
+# ==============================================================================
+
+# Initialisation des variables de session
+if "statut_connexion" not in st.session_state:
+    st.session_state.statut_connexion = "Déconnecté"
+
+if st.session_state.statut_connexion == "Déconnecté":
+    st.write("---")
+    
+    # Carte centrale flottante style Marbre Blanc
+    st.markdown(
+        """
+        <div style="background: rgba(255, 255, 255, 0.8); padding: 30px; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.05); text-align: center; max-width: 420px; margin: 0 auto; box-shadow: 0 15px 35px rgba(0,0,0,0.06);">
+            <h2 style="color: #2c3e50; margin-top: 0; font-weight: 600; font-size: 24px;">Nairu AI</h2>
+            <p style="color: #7f8c8d; font-size: 13px; margin-bottom: 20px;">Connectez-vous ou créez un profil d'équipe</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # Alignement du formulaire au centre
+    col_space1, col_center, col_space2 = st.columns([1, 2, 1])
+    
+    with col_center:
+        st.write("")
+        
+        # Onglets discrets Streamlit pour basculer entre Connexion et Inscription
+        onglet_connexion, onglet_inscription = st.tabs(["🔒 Se connecter", "📝 Créer un compte"])
+        
+        # --- TAB 1 : CONNEXION ---
+        with onglet_connexion:
+            st.write("")
+            nom_user = st.text_input("👤 Nom d'utilisateur :", placeholder="Ex: Eliott ou Leny", key="login_nom")
+            mdp_user = st.text_input("🔑 Mot de passe :", type="password", placeholder="••••••••", key="login_mdp")
+            
+            st.write("")
+            if st.button("🚀 Valider la connexion", use_container_width=True, key="btn_login"):
+                if nom_user and mdp_user:
+                    nom_propre = nom_user.strip()
+                    st.session_state.statut_connexion = nom_propre
+                    st.success(f"Connexion réussie ! Bienvenue {nom_propre}.")
+                    st.rerun()
+                else:
+                    st.error("⚠️ Veuillez remplir tous les champs pour vous connecter.")
+                    
+        # --- TAB 2 : CRÉATION DE COMPTE ---
+        with onglet_inscription:
+            st.write("")
+            nouveau_nom = st.text_input("👤 Choisissez un nom d'utilisateur :", placeholder="Ex: Invite123", key="signup_nom")
+            nouveau_mdp = st.text_input("🔑 Choisissez un mot de passe :", type="password", placeholder="••••••••", key="signup_mdp")
+            confirmer_mdp = st.text_input("🔄 Confirmez le mot de passe :", type="password", placeholder="••••••••", key="signup_mdp_conf")
+            
+            st.write("")
+            if st.button("✨ Enregistrer le compte", use_container_width=True, key="btn_signup"):
+                if nouveau_nom and nouveau_mdp and confirmer_mdp:
+                    if nouveau_mdp == confirmer_mdp:
+                        nom_cree = nouveau_nom.strip()
+                        # Simulation de création : connecte directement l'utilisateur après inscription
+                        st.session_state.statut_connexion = nom_cree
+                        st.success(f"Compte créé avec succès ! Bienvenue à bord, {nom_cree}.")
+                        st.rerun()
+                    else:
+                        st.error("⚠️ Les mots de passe ne correspondent pas.")
+                else:
+                    st.error("⚠️ Veuillez remplir tous les champs pour créer un compte.")
