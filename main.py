@@ -83,13 +83,7 @@ def chercher_web(requete):
 if st.session_state.statut_connexion == "Déconnecté":
     st.title("bienvenue sur nairu")
     
-    col_x1, col_form, col_x2 = st.columns([1, 2, 1])
-    with col_form:
-        # On affiche directement le formulaire de connexion sans onglets autour
-st.markdown("### 🔒 Connexion")
-
-# Ici, tu laisses ton code existant qui gère la connexion 
-# (les champs st.text_input pour l'identifiant, le mot de passe, et le bouton)
+    
         
         with tab_login:
             st.write("")
@@ -108,17 +102,27 @@ st.markdown("### 🔒 Connexion")
                     if st.session_state.statut_connexion == "Déconnecté":
                          st.title("Connexion à Nairu")
 # ==============================================================================
-# --- INTERFACE DE L'ACCÈS INVITÉ ---
+# --- INTERFACE UNIQUE : CONNEXION ET INFORMATIONS INVITÉS ---
 # ==============================================================================
-st.markdown("### 🌐 Espace Invité")
 
-# --- 1. CODE DE SÉCURITÉ POUR ACCÉDER À LA VERSION DE TEST ---
-st.info("💡 Bienvenue sur l'accès invité de Nairu. Prenez connaissance des informations ci-dessous avant de vous lancer.")
+# --- 1. ZONE DE CONNEXION PRINCIPALE ---
+st.markdown("### 🔒 Connexion")
 
-# --- 2. BOUTON EN SAVOIR PLUS ---
-with st.expander("ℹ️"):
+# Laisse ici TOUT ton code d'identification d'origine bien aligné à gauche :
+# (Exemple : tes inputs pour l'identifiant, le code secret, le bouton de validation...)
+# IMPORTANT : Comme il n'y a plus de "with", supprime les espaces au début de tes lignes de connexion !
+
+
+st.markdown("---")
+
+
+# --- 2. ZONE D'INFORMATIONS POUR LES INVITÉS (JUSTE EN DESSOUS) ---
+st.markdown("### 🌐 Espace Invité & Infos")
+st.info("💡 Bienvenue sur Nairu. Prenez connaissance des informations ci-dessous si vous n'avez pas de compte.")
+
+with st.expander("ℹ️ En savoir plus sur l'application"):
     st.write(
-        "Actuellement, un compte utilisateur est **requis** pour utiliser la version complète "
+        "Actuellement, un compte utilisateur est **strictement requis** pour utiliser la version complète "
         "et débloquer toutes les fonctionnalités de l'IA Nairu."
     )
     st.write(
@@ -126,31 +130,24 @@ with st.expander("ℹ️"):
         "pour chaque membre connecté."
     )
 
-st.markdown("---")
-
-# --- 3. INFOS TECHNIQUES (GROQ / DUCKDUCKGO) ---
-st.markdown("### ⚡ Spécifications Techniques")
+st.markdown("#### ⚡ Spécifications Techniques")
 col_tech1, col_tech2 = st.columns(2)
 
 with col_tech1:
     st.metric(label="Moteur d'infrastructure", value="Groq Cloud")
-    st.caption("Permet des réponses ultra-rapides et fluides en temps réel.")
+    st.caption("Réponses ultra-rapides en temps réel.")
 
 with col_tech2:
     st.metric(label="Base de connaissances", value="DuckDuckGo Search")
-    st.caption("Fournit une recherche internet en direct pour des infos toujours à jour.")
+    st.caption("Recherche internet en direct pour des infos à jour.")
 
-st.markdown("---")
+st.markdown("#### 📬 Une question ou un problème ?")
+st.write("Si vous avez des questions ou besoin d'un accès complet, contactez-moi directement :")
 
-# --- 4. CONTACT INSTAGRAM (ELIOTT31TLS) ---
-st.markdown("### 📬 Une question ou un problème ?")
-st.write("Si vous avez des questions, des remarques ou besoin d'un accès complet, n'hésitez pas à me contacter directement :")
-
-# Bouton stylisé qui renvoie vers ton Instagram
 st.link_button(
     "💬 Me contacter sur Instagram", 
     "https://instagram.com/Eliott31tls"
 )
-st.caption("Compte officiel : @Eliott31tls")    
+st.caption("Compte officiel : @Eliott31tls")
 
 
