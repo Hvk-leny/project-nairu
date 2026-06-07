@@ -232,3 +232,75 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# ==============================================================================
+# --- EXTENSION : SYSTÈME MULTI-CONVERSATIONS & HISTORIQUE (AJOUTÉ EN PLUS) ---
+# ==============================================================================
+
+# 1. INITIALISATION DE L'HISTORIQUE DANS LA BARRE LATÉRALE
+if "conversations" not in st.session_state:
+    st.session_state.conversations = {
+        "Discussion 1": []
+    }
+if "current_chat" not in st.session_state:
+    st.session_state.current_chat = "Discussion 1"
+
+st.sidebar.write("---")
+st.sidebar.subheader("💬 Vos Discussions")
+
+# Bouton pour créer une nouvelle conversation
+if st.sidebar.button("➕ Nouvelle conversation", use_container_width=True):
+    nouvel_id = f"Discussion {len(st.session_state.conversations) + 1}"
+    st.session_state.conversations[nouvel_id] = []
+    st.session_state.current_chat = nouvel_id
+    st.rerun()
+
+# Liste des conversations pour basculer de l'une à l'autre
+chat_options = list(st.session_state.conversations.keys())
+choix_chat = st.sidebar.selectbox(
+    "Ouvrir une discussion :", 
+    chat_options, 
+    index=chat_options.index(st.session_state.current_chat)
+)
+
+# Si l'on change de discussion
+if choix_chat != st.session_state.current_chat:
+    st.session_state.current_chat = choix_chat
+    st.rerun()
+
+# 2. SAUVEGARDE DU MESSAGE ACTUEL DANS L'HISTORIQUE
+if 'prompt' in locals() and prompt:
+    # On vérifie si ce message n'est pas déjà le dernier enregistré pour éviter les doublons
+    historique_actuel = st.session_state.conversations[st.session_state.current_chat]
+    if not historique_actuel or historique_actuel[-1]["content"] != prompt:
+        st.session_state.conversations[st.session_state.current_chat].append({"role": "user", "content": prompt})
+        
+        # Si Nairu a généré une réponse juste au-dessus, on la capture et on l'enregistre aussi
+        if 'response_text' in locals():
+            st.session_state.conversations[st.session_state.current_chat].append({"role": "assistant", "content": response_text})
+
+# 3. REDESSINER L'HISTORIQUE PROPREMENT À L'ÉCRAN
+st.write("---")
+st.write(f"📝 *Historique de la session active : {st.session_state.current_chat}*")
+for msg in st.session_state.conversations[st.session_state.current_chat]:
+    if msg["role"] == "user":
+        with st.chat_message("user"):
+            st.write(msg["content"])
+    else:
+        with st.chat_message("assistant", avatar="⚡"):
+            st.write(msg["content"])
+
+# --- AFFICHAGE DE L'HEURE DE FRANCE SOUS LA BARRE DE SAISIE ---
+import datetime
+from zoneinfo import ZoneInfo
+
+fuseau_france = ZoneInfo("Europe/Paris")
+heure_actuelle = datetime.datetime.now(fuseau_france).strftime("%H:%M")
+
+st.markdown(
+    f"""
+    <div style="text-align: right; margin-top: 20px; color: gray; font-family: monospace; font-size: 12px;">
+        🕒 {heure_actuelle}
+    </div>
+    """, 
+    unsafe_allow_html=True
+)
