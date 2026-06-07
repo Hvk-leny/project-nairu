@@ -186,3 +186,64 @@ else:
     if st.button("🔴 Déconnexion"):
         st.session_state.statut_connexion = "Déconnecté"
         st.rerun()
+        # ==============================================================================
+# --- 4. INTERFACE UNE FOIS CONNECTÉ ---
+# ==============================================================================
+else:
+    # 🔴 CAS COMPTE SUPER-ADMINISTRATEUR (admin1)
+    if st.session_state.user_connecte == "admin1":
+        st.markdown("## 🛠️ PANNEAU DE CONTRÔLE SÉCURITÉ - NAIRU")
+        st.info("Bienvenue Eliott ou Leny. Ici, vous gérez les utilisateurs et bloquez les attaques par spam.")
+        
+        data_totale = charger_utilisateurs()
+        
+        # --- SECTION COMPTES & IP ---
+        st.markdown("### 👥 Utilisateurs enregistrés et Adresses IP")
+        
+        # On affiche la liste proprement
+        for nom, infos in data_totale["comptes"].items():
+            if nom != "admin1" and nom != "exemple": # On masque les admins de la liste de modération
+                col_user, col_ip, col_action = st.columns([2, 2, 1])
+                with col_user:
+                    st.write(f"**Identifiant :** {nom} ({infos.get('email', 'Pas de mail')})")
+                with col_ip:
+                    st.code(infos.get('ip', '0.0.0.0'))
+                with col_action:
+                    # Bouton pour bannir l'IP de ce compte
+                    if st.button(f"🚫 Bannir", key=f"ban_{nom}"):
+                        user_ip_to_ban = infos.get('ip')
+                        if user_ip_to_ban and user_ip_to_ban not in data_totale["banned_ips"]:
+                            data_totale["banned_ips"].append(user_ip_to_ban)
+                            # On supprime le compte du spammeur pour nettoyer
+                            del data_totale["comptes"][nom]
+                            sauvegarder_donnees(data_totale)
+                            st.success(f"IP {user_ip_to_ban} bannie et compte supprimé !")
+                            st.rerun()
+
+        # --- SECTION IP BANNIES ---
+        st.markdown("---")
+        st.markdown("### 🛑 Liste des adresses IP bloquées")
+        if not data_totale.get("banned_ips"):
+            st.write("*Aucune IP bloquée pour le moment. Le site est safe.*")
+        else:
+            for ip in data_totale["banned_ips"]:
+                col_banned, col_unban = st.columns([4, 1])
+                with col_banned:
+                    st.error(f"IP Bloquée : {ip}")
+                with col_unban:
+                    if st.button("🔓 Débloquer", key=f"unban_{ip}"):
+                        data_totale["banned_ips"].remove(ip)
+                        sauvegarder_donnees(data_totale)
+                        st.success(f"IP {ip} débloquée !")
+                        st.rerun()
+
+    # 🟢 CAS UTILISATEUR CLASSIQUE CONNECTÉ
+    else:
+        st.write(f"Félicitations {st.session_state.user_connecte}, tu es connecté à l'interface de Nairu ! Moteur prêt.")
+    
+    # BOUTON DE DÉCONNEXION COMMUN
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("🔴 Déconnexion", use_container_width=True):
+        st.session_state.statut_connexion = "Déconnecté"
+        st.session_state.user_connecte = None
+        st.rerun()
