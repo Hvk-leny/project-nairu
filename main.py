@@ -119,10 +119,10 @@ else:
             st.session_state.data["users"][prenom]["history"].append({"role": "user", "content": prompt})
             st.session_state.data["users"][prenom]["history"].append({"role": "assistant", "content": reponse_ia})
             sauvegarder_base(st.session_state.data)
-# --- CONFIGURATION GEMINI ET INTERFACE ---
-# Activation de ta clé API Gemini
-import google.generativeai as genai
-genai.configure(api_key="AQ.Ab8RN6KP8ocy7XzsvOLZT0jdqFN8WwywA2ANOtBJqvpBZyWTvQ")
+# --- CONFIGURATION GROQ ET INTERFACE ---
+# Activation de ta clé API Groq
+from groq import Groq
+client = Groq(api_key="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")
 
 # Création du menu dans la barre latérale
 st.sidebar.title("⚡ Configuration du Néron")
@@ -135,32 +135,30 @@ option = st.sidebar.radio(
 if option == "Option Flash ⚡":
     st.sidebar.info("Mode Flash : Réponses courtes et ultra rapides.")
     system_instruction = "Tu es Néron. Réponds de manière ultra rapide, concise, claire et directe, va droit au but."
-    model_name = "models/gemini-2.0-flash"
+    model_name = "llama3-8b-8192"
 
 elif option == "Option Réflexion 💬":
     st.sidebar.info("Mode Réflexion : Analyse profonde et structurée.")
     system_instruction = "Tu es Néron. Prends le temps de bien analyser. Donne une réponse très détaillée, logique, technique et approfondie."
-    model_name = "models/gemini-2.0-pro"
+    model_name = "llama3-70b-8192"
 
 elif option == "Option Passionné / Intéressé 🔥":
     st.sidebar.info("Mode Passionné : Expert auto à 100% !")
     system_instruction = "Tu es Néron, un expert automobile absolu. Réponds avec énormément d'enthousiasme et de passion. Utilise un ton de connaisseur."
-    model_name = "models/gemini-2.0-flash"
+    model_name = "llama3-8b-8192"
 
-# --- APPEL À GEMINI ---
+# --- APPEL À L'IA (GROQ) ---
 if 'prompt' in locals() and prompt:
     try:
-        model = genai.GenerativeModel(
-            model_name=model_name,
-            system_instruction=system_instruction
+        completion = client.chat.completions.create(
+            model=model_name,
+            messages=[
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
         )
-        response = model.generate_content(prompt)
-        st.write(response.text)
+        response_text = completion.choices[0].message.content
+        st.write(response_text)  # Affiche la réponse sur ton site
     except Exception as e:
-        st.error(f"Erreur Gemini : {e}")
-         
-       
-    
-
-    
-        # ----------------------
+        st.error(f"Erreur Néron (Groq) : {e}")
