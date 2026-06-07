@@ -101,7 +101,18 @@ if st.session_state.statut_connexion == "Déconnecté":
                         st.error("❌ Code secret incorrect.")
                 else:
                     st.error("❌ Identifiant non reconnu.")
-                    
+                    if st.session_state.statut_connexion == "Déconnecté":
+    st.title("🤖 Connexion à Nairu")
+    
+    # --- OPTION EN SAVOIR PLUS ---
+    with st.expander("ℹ️ En savoir plus sur Nairu"):
+        st.write(
+            "Nairu est un assistant virtuel 100 % français conçu pour être performant, fluide et accessible. "
+            "Il fonctionne grâce à la puissance de calcul instantanée du moteur **Groq API** (modèles Llama 3) "
+            "et s'appuie sur le moteur **DuckDuckGo** pour effectuer ses recherches de données sur Internet en temps réel."
+        )
+    
+    col_x1, col_form, col_x2 = st.columns([1, 2, 1])
         with tab_guest:
             st.write("")
             st.info("Le mode invité donne un accès de démonstration sans historique.")
