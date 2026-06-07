@@ -304,3 +304,82 @@ st.markdown(
     """, 
     unsafe_allow_html=True
 )
+
+# ==============================================================================
+# --- EXTENSION : DESIGN FUTURISTE & EFFET AQUA / GLASSMORPHISM (IOS STYLE) ---
+# ==============================================================================
+
+st.markdown(
+    """
+    <style>
+    /* 1. Fond d'écran futuriste avec un dégradé fluide aqua/sombre */
+    .stApp {
+        background: linear-gradient(135deg, #0d1b2a 0%, #0b253a 50%, #004b6e 100%);
+        background-attachment: fixed;
+    }
+
+    /* 2. Effet "Eau/Verre" (Glassmorphism) sur les bulles de chat */
+    .stChatMessage {
+        background-color: rgba(255, 255, 255, 0.06) !important;
+        backdrop-filter: blur(12px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 18px !important;
+        padding: 15px !important;
+        margin-bottom: 12px !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2) !important;
+        transition: all 0.3s ease;
+    }
+
+    /* Différenciation de la bulle utilisateur (style iOS bleuté transparent) */
+    .stChatMessage[data-testid="stChatMessageUser"] {
+        background-color: rgba(0, 119, 182, 0.2) !important;
+        border: 1px solid rgba(0, 180, 216, 0.3) !important;
+    }
+
+    /* 3. Style de la barre latérale (Sidebar) façon panneau de contrôle transparent */
+    [data-testid="stSidebar"] {
+        background-color: rgba(13, 27, 42, 0.4) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* 4. Personnalisation des boutons (Style boutons d'iPhone en verre) */
+    .stButton>button {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #00b4d8 !important;
+        border: 1px solid rgba(0, 180, 216, 0.4) !important;
+        border-radius: 12px !important;
+        backdrop-filter: blur(5px) !important;
+        font-weight: bold !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+
+    .stButton>button:hover {
+        background: rgba(0, 180, 216, 0.2) !important;
+        box-shadow: 0 0 15px rgba(0, 180, 216, 0.5) !important;
+        color: #ffffff !important;
+        transform: scale(1.02);
+    }
+
+    /* 5. Titres et textes flashys futuristes */
+    h1, h2, h3, p, span, label {
+        color: #e0e1dd !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    }
+    
+    /* Couleur néon aqua pour le titre de configuration */
+    .stSidebar subheader, .stSidebar title {
+        color: #00b4d8 !important;
+    }
+
+    /* 6. Curseur de créativité (Slider) style néon */
+    div[data-testid="stSlider"] [data-testid="stThumb"] {
+        background-color: #00b4d8 !important;
+        box-shadow: 0 0 10px #00b4d8 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
