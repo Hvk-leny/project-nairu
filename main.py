@@ -229,3 +229,44 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+# ==============================================================================
+# --- EFFET HOVER : APPARITION DE LA BARRE LATÉRALE AU SURVOL DE LA SOURIS ---
+# ==============================================================================
+st.markdown(
+    """
+    <style>
+    /* 1. Configuration de la barre latérale fermée par défaut et sa transition */
+    [data-testid="stSidebar"] {
+        left: -300px !important; /* On la cache vers la gauche */
+        transition: left 0.3s ease-in-out !important;
+        position: fixed !important;
+        z-index: 999990 !important;
+    }
+
+    /* 2. Création d'une zone invisible de détection à gauche de l'écran (largeur 40px) */
+    .stApp::before {
+        content: "" !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 40px !important; /* Plus tu augmentes, plus la détection est sensible */
+        height: 100vh !important;
+        z-index: 999980 !important;
+    }
+
+    /* 3. Quand la souris approche du bord gauche OU survole le menu, on l'affiche */
+    .stApp:hover [data-testid="stSidebar"],
+    [data-testid="stSidebar"]:hover {
+        left: 0 !important; /* Elle glisse vers sa position normale */
+    }
+
+    /* 4. On ajuste la zone centrale de l'application pour qu'elle prenne tout l'espace */
+    [data-testid="stMain"] {
+        margin-left: 0 !important;
+        width: 100% !important;
+        transition: margin-left 0.3s ease-in-out !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
