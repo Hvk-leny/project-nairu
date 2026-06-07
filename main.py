@@ -135,17 +135,17 @@ option = st.sidebar.radio(
 if option == "Option Flash ⚡":
     st.sidebar.info("Mode Flash : Réponses courtes et ultra rapides.")
     system_instruction = "Tu es Néron. Réponds de manière ultra rapide, concise, claire et directe, va droit au but."
-    model_name = "llama3-8b-8192"
+    model_name = "llama-3.1-8b-instant"
 
 elif option == "Option Réflexion 💬":
     st.sidebar.info("Mode Réflexion : Analyse profonde et structurée.")
     system_instruction = "Tu es Néron. Prends le temps de bien analyser. Donne une réponse très détaillée, logique, technique et approfondie."
-    model_name = "llama3-70b-8192"
+    model_name = "llama-3.3-70b-specdec"
 
 elif option == "Option Passionné / Intéressé 🔥":
     st.sidebar.info("Mode Passionné : Expert auto à 100% !")
     system_instruction = "Tu es Néron, un expert automobile absolu. Réponds avec énormément d'enthousiasme et de passion. Utilise un ton de connaisseur."
-    model_name = "llama3-8b-8192"
+    model_name = "llama-3.1-8b-instant"
 
 # --- APPEL À L'IA (GROQ) ---
 if 'prompt' in locals() and prompt:
@@ -159,6 +159,6 @@ if 'prompt' in locals() and prompt:
             temperature=0.7,
         )
         response_text = completion.choices[0].message.content
-        st.write(response_text)  # Affiche la réponse sur ton site
+        st.write(response_text)
     except Exception as e:
         st.error(f"Erreur Néron (Groq) : {e}")
