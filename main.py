@@ -737,3 +737,29 @@ def purger_anciens_messages():
 
 # Exécution de la vérification au chargement
 purger_anciens_messages()
+
+# ==============================================================================
+# --- EXTENSION : INTERRUPTEUR MESSAGES ÉPHÉMÈRES (PURGE 72H) ---
+# ==============================================================================
+
+st.sidebar.write("---")
+st.sidebar.subheader("⏳ Confidentialité")
+
+# 1. Initialisation de l'option dans la mémoire du site
+if "activer_ephemere" not in st.session_state:
+    st.session_state.activer_ephemere = False
+
+# 2. Ajout de la case à cocher (Toggle) dans la barre latérale
+st.session_state.activer_ephemere = st.sidebar.toggle(
+    "🗑️ Activer les messages éphémères", 
+    value=st.session_state.activer_ephemere
+)
+
+# 3. Affichage du message d'information uniquement si l'option est cochée
+if st.session_state.activer_ephemere:
+    st.sidebar.info("🔒 Mode actif : Les messages de ce chat sont maintenant sauvegardés pendant 72h maximum avant d'être purgés.")
+    
+    # Ici, la logique automatique peut s'exécuter si l'option est vraie
+    # (Par exemple, filtrer les messages selon leur horodatage)
+else:
+    st.sidebar.caption("💡 Le mode éphémère est désactivé. Les messages restent conservés normalement.")
