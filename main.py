@@ -192,9 +192,7 @@ else:
                 data_totale = charger_utilisateurs()
                 st.markdown("#### 👥 Modération des comptes")
                 
-                # On parcourt la liste des comptes du JSON
                 for nom, infos in list(data_totale["comptes"].items()):
-                    # On ne touche pas aux comptes système/permanents
                     if nom not in ["admin1", "leny", "eliott", "exemple"]:
                         st.markdown(f"**Identifiant :** `{nom}`")
                         st.caption(f"IP : {infos.get('ip', '0.0.0.0')} | Email : {infos.get('email', 'N/A')}")
@@ -219,7 +217,6 @@ else:
                                 st.rerun()
                         st.markdown("---")
                 
-                # --- AFFICHAGE ET GESTION DES IP BANNIES ---
                 st.markdown("#### 🛑 IP Bloquées")
                 if not data_totale.get("banned_ips"):
                     st.write("*Aucune IP bloquée.*")
@@ -237,5 +234,37 @@ else:
 
     # 🟢 CHAT IA POUR TOUT LE MONDE
     st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
+    
+    for msg in st.session_state.messages_chat:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
+    
+    prompt_utilisateur = st.chat_input("Posez votre question à Nairu...")
+    
+    if prompt_utilisateur:
+        with st.chat_message("user"):
+            st.write(prompt_utilisateur)
+        st.session_state.messages_chat.append({"role": "user", "content": prompt_utilisateur})
+        
+        try:
+            client_groq = Groq(api_key=st.secrets["GROQ_API_KEY"])
+            with st.chat_message("assistant"):
+                with st.spinner("Nairu fouille le web et réfléchit..."):
+                    contexte_web = executer_recherche_web(prompt_utilisateur)
+                    system_instruction = f"Tu es Nairu, une IA de recherche créée par Leny et Eliott. Utilise ces infos web si besoin : {contexte_web}"
+                    
+                    historique_complet = [{"role": "system", "content": system_instruction}] + st.session_state.messages_chat
+                    reponse_brute = client_groq.chat.completions.create(model="llama3-8b-8192", messages=historique_complet)
+                    texte_reponse = reponse_brute.choices[0].message.content
+                    st.write(texte_reponse)
+            st.session_state.messages_chat.append({"role": "assistant", "content": texte_reponse})
+        except:
+            st.error("❌ Erreur de clé API Groq.")
+
+    st.markdown("<br><hr>", unsafe_allow_html=True)
+    if st.button("🔴 Déconnexion", use_container_width=True):
+        st.session_state.statut_connexion = "Déconnecté"
+        st.session_state.user_connecte = None
         st.session_state.messages_chat = []
         st.rerun()
+        
