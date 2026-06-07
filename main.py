@@ -9,52 +9,59 @@ from groq import Groq
 # ==============================================================================
 DB_FILE = "utilisateurs.json"
 
-# Fonction magique et ultra-rapide pour choper l'IP de l'utilisateur
 def recuperer_ip_visiteur():
     try:
-        # On interroge un mini-service gratuit qui renvoie juste l'IP publique
         reponse = requests.get("https://api.ipify.org?format=json", timeout=3)
         return reponse.json().get("ip")
     except:
-        return "127.0.0.1" # IP de secours si le service est indisponible
+        return "127.0.0.1"
 
 def charger_utilisateurs():
     if not os.path.exists(DB_FILE):
-        # Compte exemple d'origine avec une fausse IP pour la structure
         default_db = {
-            "exemple": {
-                "email": "exemple@nairu.com",
-                "password": "exemple",
-                "ip": "0.0.0.0"
-            }
+            "comptes": {
+                "exemple": {"email": "exemple@nairu.com", "password": "exemple", "ip": "0.0.0.0"},
+                "admin1": {"email": "admin@nairu.com", "password": "adminnairu1", "ip": "127.0.0.1"}
+            },
+            "banned_ips": []
         }
         with open(DB_FILE, "w", encoding="utf-8") as f:
             json.dump(default_db, f, indent=4)
         return default_db
     try:
         with open(DB_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+            if "comptes" not in data:
+                data = {"comptes": data, "banned_ips": []}
+            if "admin1" not in data["comptes"]:
+                data["comptes"]["admin1"] = {"email": "admin@nairu.com", "password": "adminnairu1", "ip": "127.0.0.1"}
+            return data
     except:
-        return {}
+        return {"comptes": {}, "banned_ips": []}
+
+def sauvegarder_donnees(data):
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
 
 def sauvegarder_utilisateur(username, email, password, ip_address):
-    comptes = charger_utilisateurs()
-    comptes[username] = {
+    data = charger_utilisateurs()
+    data["comptes"][username] = {
         "email": email,
         "password": password,
-        "ip": ip_address # On enregistre son IP précieusement
+        "ip": ip_address
     }
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(comptes, f, indent=4)
+    sauvegarder_donnees(data)
 
-# Fonction pour vérifier si une IP a déjà créé un compte sur le site
 def ip_deja_utilisee(ip_address):
-    comptes = charger_utilisateurs()
-    for nom, infos in comptes.items():
-        # Si l'IP existe déjà et que ce n'est pas le compte admin "exemple"
-        if infos.get("ip") == ip_address and nom != "exemple":
+    data = charger_utilisateurs()
+    for nom, infos in data["comptes"].items():
+        if infos.get("ip") == ip_address and nom not in ["exemple", "admin1"]:
             return True
     return False
+
+def est_ip_bannie(ip_address):
+    data = charger_utilisateurs()
+    return ip_address in data.get("banned_ips", [])
 
 # ==============================================================================
 # --- 2. MISE EN PAGE & LOGIQUE DES SESSIONS ---
@@ -109,7 +116,6 @@ if st.session_state.statut_connexion == "Déconnecté":
             # --- ONGLET 1 : CONNEXION ---
             with tab_login:
                 st.markdown("### Connexion")
-                base_comptes = charger_utilisateurs()
                 
                 with st.form(key="form_connexion"):
                     identifiant = st.text_input("Identifiant ou Prénom :", placeholder="exemple", key="login_username")
@@ -117,15 +123,17 @@ if st.session_state.statut_connexion == "Déconnecté":
                     bouton_connexion = st.form_submit_button("Se connecter", use_container_width=True)
                     
                     if bouton_connexion:
-                        # 🔑 CODE SÉCURITÉ : Validation du compte admin en dur
-                        if identifiant == "admin1" and code_secret == "adminnairu1":
+                        user_ip = recuperer_ip_visiteur()
+                        data_totale = charger_utilisateurs() # Chargement global sécurisé
+                        
+                        if est_ip_bannie(user_ip):
+                            st.error("❌ Accès refusé. Votre connexion internet a été bannie de ce site.")
+                        elif identifiant == "admin1" and code_secret == "adminnairu1":
                             st.session_state.statut_connexion = "Connecté"
                             st.session_state.user_connecte = "admin1"
                             st.success("Accès Super-Admin accordé !")
                             st.rerun()
-                        
-                        # Connexion classique pour les autres utilisateurs via le JSON
-                        elif identifiant in base_comptes and base_comptes[identifiant]["password"] == code_secret:
+                        elif identifiant in data_totale["comptes"] and data_totale["comptes"][identifiant]["password"] == code_secret:
                             st.session_state.statut_connexion = "Connecté"
                             st.session_state.user_connecte = identifiant
                             st.success(f"Bienvenue {identifiant} !")
@@ -151,24 +159,22 @@ if st.session_state.statut_connexion == "Déconnecté":
                     bouton_inscription = st.form_submit_button("Créer mon compte", use_container_width=True)
                     
                     if bouton_inscription:
-                        base_comptes = charger_utilisateurs()
+                        data_totale = charger_utilisateurs()
                         
-                        # Étape 1 : On récupère l'IP du visiteur en direct
                         with st.spinner("Vérification de sécurité..."):
                             user_ip = recuperer_ip_visiteur()
                         
-                        # Étape 2 : Les vérifications de sécurité
-                        if nouvel_identifiant.strip() == "" or nouvel_email.strip() == "" or nouveau_code.strip() == "":
+                        if est_ip_bannie(user_ip):
+                            st.error("❌ Opération impossible. Votre connexion internet a été bannie.")
+                        elif nouvel_identifiant.strip() == "" or nouvel_email.strip() == "" or nouveau_code.strip() == "":
                             st.warning("Veuillez remplir tous les champs.")
                         elif "@" not in nouvel_email or "." not in nouvel_email:
                             st.error("Veuillez entrer une adresse email valide.")
-                        elif nouvel_identifiant in base_comptes:
+                        elif nouvel_identifiant in data_totale["comptes"]:
                             st.error("Cet identifiant existe déjà !")
                         elif ip_deja_utilisee(user_ip):
-                            # 🔥 LA SÉCURITÉ MAGIQUE : On bloque si l'IP a déjà servi !
                             st.error("❌ Sécurité : Un compte a déjà été créé avec votre connexion internet.")
                         else:
-                            # Tout est OK, on enregistre l'IP avec le reste dans le JSON
                             sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code, user_ip)
                             st.success("🎉 Compte créé avec succès ! Vous pouvez maintenant vous connecter.")
 
@@ -198,7 +204,6 @@ else:
         
         data_totale = charger_utilisateurs()
         
-        # --- SECTION COMPTES & IP ---
         st.markdown("### 👥 Utilisateurs enregistrés et Adresses IP")
         
         for nom, infos in data_totale["comptes"].items():
