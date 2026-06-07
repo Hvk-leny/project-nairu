@@ -211,52 +211,26 @@ else:
         st.markdown(f'<div style="text-align: right; color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 20px;">🕒 {heure_actuelle}</div>', unsafe_allow_html=True)
 
 # ==============================================================================
-# --- ACCÈS DIRECT : FIX APPARENCE BOUTON LATÉRAL ---
+# --- BOUTON DE NAVIGATION NATIF ---
 # ==============================================================================
+# On masque complètement le bouton d'origine buggué en CSS
 st.markdown(
     """
     <style>
-    /* 1. Force la disparition complète du texte d'origine 'ouble_arrow_right' */
-    [data-testid="stSidebarCollapseButton"] button div,
-    [data-testid="stSidebarCollapseButton"] button span,
-    [data-testid="stSidebarCollapseButton"] button svg {
+    [data-testid="stSidebarCollapseButton"] {
         display: none !important;
         visibility: hidden !important;
-        opacity: 0 !important;
-    }
-
-    /* 2. On redonne une taille propre au bouton */
-    [data-testid="stSidebarCollapseButton"] button {
-        background-color: #151d30 !important;
-        border: 1px solid rgba(0, 240, 255, 0.3) !important;
-        border-radius: 20px !important;
-        padding: 6px 16px !important;
-        color: #00f0ff !important;
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
-        font-size: 14px !important;
-        font-weight: 600 !important;
-        min-width: 90px !important;
-    }
-
-    /* 3. On injecte proprement le mot 'Ouvrir' quand c'est fermé */
-    [data-testid="stSidebarCollapseButton"] button::after {
-        content: "Ouvrir ➔" !important;
-        color: #00f0ff !important;
-        font-size: 14px !important;
-    }
-
-    /* 4. On injecte 'Fermer' quand c'est ouvert */
-    .stApp:has([data-testid="stSidebar"][aria-expanded="true"]) [data-testid="stSidebarCollapseButton"] button::after {
-        content: "Fermer ✕" !important;
-    }
-
-    /* 5. Effet de survol */
-    [data-testid="stSidebarCollapseButton"] button:hover {
-        background-color: #00f0ff !important;
-        color: #070a10 !important;
-        box-shadow: 0 0 12px rgba(0, 240, 255, 0.4) !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
+# On gère l'ouverture/fermeture proprement avec un vrai bouton
+if "sidebar_state" not in st.session_state:
+    st.session_state.sidebar_state = "expanded"
+
+if st.session_state.sidebar_state == "collapsed":
+    if st.button("Ouvrir ➔"):
+        st.session_state.sidebar_state = "expanded"
+        st.損rerun()
