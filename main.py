@@ -199,9 +199,8 @@ if st.session_state.statut_connexion == "Déconnecté":
                 st.link_button("🎵 TikTok d'Eliott", "https://tiktok.com/@eliott31tls", use_container_width=True)
                 
             with col_leny:
-                st.markdown("**⚡ Leny (Falkon)**")
-                # Tu pourras remplacer ces liens fictifs par tes vrais réseaux si tu veux !
-                st.link_button("📸 Instagram de Leny", "https://instagram.com/hvk_leny_ou_ton_pseudo", use_container_width=True)
+                st.markdown("**⚡ Leny**")
+                st.link_button("📸 Instagram de Leny", "https://instagram.com/ton_pseudo_instagram", use_container_width=True)
                 st.link_button("🎵 TikTok de Leny", "https://tiktok.com/@ton_pseudo_tiktok", use_container_width=True)
                 
             st.markdown("---")
