@@ -209,3 +209,50 @@ else:
         fuseau_france = ZoneInfo("Europe/Paris")
         heure_actuelle = datetime.datetime.now(fuseau_france).strftime("%H:%M")
         st.markdown(f'<div style="text-align: right; color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 20px;">🕒 {heure_actuelle}</div>', unsafe_allow_html=True)
+
+# ==============================================================================
+# --- ACCÈS DIRECT : BOUTON DYNAMIQUE OUVRIR / FERMER LE PANNEAU LATÉRAL ---
+# ==============================================================================
+st.markdown(
+    """
+    <style>
+    /* Ciblage et re-stylisation du bouton natif Streamlit */
+    [data-testid="stSidebarCollapseButton"] button {
+        background-color: #151d30 !important;
+        border: 1px solid rgba(0, 240, 255, 0.3) !important;
+        border-radius: 20px !important;
+        padding: 6px 16px !important;
+        color: #00f0ff !important;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        width: auto !important;
+        height: auto !important;
+    }
+
+    /* Masquage de la flèche brute par défaut */
+    [data-testid="stSidebarCollapseButton"] button svg,
+    [data-testid="stSidebarCollapseButton"] button span {
+        display: none !important;
+    }
+
+    /* Texte affiché par défaut quand le menu est FERMÉ */
+    [data-testid="stSidebarCollapseButton"] button::after {
+        content: "Ouvrir ➔" !important;
+    }
+
+    /* Changement dynamique du texte quand le menu est OUVERT */
+    .stApp:has([data-testid="stSidebar"][aria-expanded="true"]) [data-testid="stSidebarCollapseButton"] button::after {
+        content: "Fermer ✕" !important;
+    }
+
+    /* Effet d'illumination au survol de la souris */
+    [data-testid="stSidebarCollapseButton"] button:hover {
+        background-color: #00f0ff !important;
+        color: #070a10 !important;
+        box-shadow: 0 0 12px rgba(0, 240, 255, 0.4) !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
