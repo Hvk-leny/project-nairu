@@ -180,19 +180,21 @@ if st.session_state.statut_connexion == "Déconnecté":
 
         # --- BLOC AUTONOME INFORMATIONS TOUT EN BAS ---
         st.markdown("<br>", unsafe_allow_html=True)
-        with st.expander("ℹ️ En savoir plus sur Nairu (Informations)"):
+       with st.expander("ℹ️ En savoir plus sur Nairu (Informations)"):
             st.markdown("### 🚀 À propos de Nairu")
-            st.write(
-                "Nous sommes **deux Toulousains passionnés de tech, Leny et Eliott**. "
-                "Un soir, on a eu l'idée un peu folle de créer l'outil ultime de recherche "
-                "tout en gardant vos données en parfaite sécurité. C'est comme ça que Nairu est né !"
-            )
+            st.write("Nous sommes **deux Toulousains passionnés de tech, Leny et Eliott**. Un soir, on a eu l'idée un peu folle de créer l'outil ultime de recherche tout en gardant vos données en parfaite sécurité. C'est comme ça que Nairu est né !")
+            st.markdown("---")
+            st.markdown("### 📱 Nos Réseaux Sociaux")
+            col_insta, col_tiktok = st.columns(2)
+            with col_insta:
+                st.link_button("📸 Instagram", "https://instagram.com/eliott31tls", use_container_width=True)
+            with col_tiktok:
+                st.link_button("🎵 TikTok", "https://tiktok.com/@eliott31tls", use_container_width=True)
             st.markdown("---")
             st.markdown("### 🪲 Un problème ou un bug ?")
             st.write("Si vous rencontrez un problème technique ou si vous voulez nous faire un retour, signalez-le en DM :")
-            st.link_button("💬 Signaler un problème sur Instagram", "https://instagram.com/eliott31tls")
-            st.caption("Auteur principal : @eliott31tls")
-
+            st.link_button("💬 Signaler un problème sur Instagram", "https://instagram.com/eliott31tls", use_container_width=True)
+            st.caption("Auteurs principaux : @eliott31tls & @Falkon")
 # ==============================================================================
 # --- 4. INTERFACE UNE FOIS CONNECTÉ ---
 # ==============================================================================
