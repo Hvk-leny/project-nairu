@@ -278,5 +278,3 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-    unsafe_allow_html=True
-)
