@@ -212,3 +212,31 @@ else:
         fuseau_france = ZoneInfo("Europe/Paris")
         heure_actuelle = datetime.datetime.now(fuseau_france).strftime("%H:%M")
         st.markdown(f'<div style="text-align: right; color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 20px;">🕒 {heure_actuelle}</div>', unsafe_allow_html=True)
+
+# ==============================================================================
+# --- CORRECTIF : NETTOYAGE DU MENU PARAMÈTRES STREAMLIT (HAUT À DROITE) ---
+# ==============================================================================
+
+st.markdown(
+    """
+    <style>
+    /* Force les textes parasites du menu de configuration à se masquer proprement */
+    div[data-testid="stMainMenu"] span, 
+    div[role="menuitem"] span {
+        text-shadow: none !important;
+        letter-spacing: normal !important;
+    }
+    
+    /* Corrige les labels qui fusionnent en haut du sélecteur de thème */
+    div[data-testid="stMainMenu"] label {
+        display: none !important; /* Masque les titres bruts qui se superposent */
+    }
+
+    /* Remet la police par défaut uniquement pour le menu Streamlit pour éviter les bugs */
+    div[role="dialog"], div[role="menu"] {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
