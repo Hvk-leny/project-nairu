@@ -230,43 +230,54 @@ st.markdown(
     unsafe_allow_html=True
 )
 # ==============================================================================
-# --- EFFET HOVER : APPARITION DE LA BARRE LATÉRALE AU SURVOL DE LA SOURIS ---
+# --- EFFET HOVER ULTRA-ROBUSTE : BARRE LATÉRALE AU SURVOL DE LA SOURIS ---
 # ==============================================================================
 st.markdown(
     """
     <style>
-    /* 1. Configuration de la barre latérale fermée par défaut et sa transition */
+    /* 1. On force la barre latérale à être visible et on la décale à gauche */
     [data-testid="stSidebar"] {
-        left: -300px !important; /* On la cache vers la gauche */
-        transition: left 0.3s ease-in-out !important;
         position: fixed !important;
+        top: 0 !important;
+        left: -320px !important; /* Totalement cachée hors écran */
+        width: 320px !important;
+        height: 100vh !important;
         z-index: 999990 !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform: translateX(0) !important;
+        background-color: #151d30 !important; /* Optionnel : aligné sur ton design sombre */
     }
 
-    /* 2. Création d'une zone invisible de détection à gauche de l'écran (largeur 40px) */
+    /* 2. Zone de détection invisible de 50px sur le bord gauche de l'écran */
+    .stApp {
+        position: relative !important;
+    }
+    
     .stApp::before {
         content: "" !important;
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
-        width: 40px !important; /* Plus tu augmentes, plus la détection est sensible */
+        width: 50px !important; /* Zone d'approche de la souris */
         height: 100vh !important;
         z-index: 999980 !important;
+        background: transparent !important;
     }
 
-    /* 3. Quand la souris approche du bord gauche OU survole le menu, on l'affiche */
+    /* 3. Déclenchement de l'ouverture quand la souris approche du bord gauche */
     .stApp:hover [data-testid="stSidebar"],
     [data-testid="stSidebar"]:hover {
-        left: 0 !important; /* Elle glisse vers sa position normale */
+        transform: translateX(320px) !important; /* Glisse proprement vers la droite */
     }
 
-    /* 4. On ajuste la zone centrale de l'application pour qu'elle prenne tout l'espace */
+    /* 4. On s'assure que la zone principale occupe tout l'écran */
     [data-testid="stMain"] {
         margin-left: 0 !important;
         width: 100% !important;
-        transition: margin-left 0.3s ease-in-out !important;
     }
     </style>
     """,
+    unsafe_allow_html=True
+)
     unsafe_allow_html=True
 )
