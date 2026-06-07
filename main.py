@@ -614,3 +614,24 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# ==============================================================================
+# --- EXTENSION : SUPPRESSION DU BANDEAU D'ACCUEIL PARASITE ---
+# ==============================================================================
+
+st.markdown(
+    """
+    <style>
+    /* Masque de force le premier message de bienvenue inutile qui bugue */
+    div.stChatMessage:has(span:-webkit-any(:contains("smart_toy"), :contains("Bonjour Eliott"))) {
+        display: none !important;
+    }
+    
+    /* Version de secours au cas où : si le texte contient exactement ce bloc, on cache */
+    div[data-testid="stChatMessage"]:first-of-type {
+        display: none !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
