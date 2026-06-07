@@ -635,3 +635,30 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# ==============================================================================
+# --- EXTENSION : BARRE DE RECHERCHE ULTRA-ARRONDIE (STYLE GEMINI) ---
+# ==============================================================================
+
+st.markdown(
+    """
+    <style>
+    /* Force la barre de recherche à devenir parfaitement ronde/ovale */
+    div[data-testid="stChatInput"] {
+        border-radius: 50px !important; /* Arrondi maximal style pilule */
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+        background-color: #ffffff !important;
+    }
+
+    /* Ajuste la zone de texte à l'intérieur pour suivre l'arrondi */
+    div[data-testid="stChatInput"] textarea {
+        border-radius: 50px !important;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
