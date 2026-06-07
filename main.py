@@ -120,35 +120,49 @@ else:
             st.session_state.data["users"][prenom]["history"].append({"role": "assistant", "content": reponse_ia})
             sauvegarder_base(st.session_state.data)
 # --- CONFIGURATION GROQ ET INTERFACE ---
-# Activation de ta clé API Groq
 from groq import Groq
 client = Groq(api_key="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")
 
-# Création du menu dans la barre latérale
-st.sidebar.title("⚡ Configuration du Néron")
+st.sidebar.title("⚡ Configuration de Nairu")
+
+# Sélection du Mode
 option = st.sidebar.radio(
     "Choisis le mode de fonctionnement :",
     ("Option Flash ⚡", "Option Réflexion 💬", "Option Passionné / Intéressé 🔥")
 )
 
-# Réglage du comportement du Néron selon l'option choisie
+# Curseur de créativité (Temperature)
+creativite = st.sidebar.slider(
+    "🧠 Niveau de créativité de l'IA :",
+    min_value=0.0,
+    max_value=1.0,
+    value=0.7,
+    step=0.1,
+    help="Plus la valeur est haute, plus l'IA est originale et surprenante."
+)
+
+# Réglage du comportement selon l'option (Nom officiel : Nairu)
 if option == "Option Flash ⚡":
     st.sidebar.info("Mode Flash : Réponses courtes et ultra rapides.")
-    system_instruction = "Tu es Néron. Réponds de manière ultra rapide, concise, claire et directe, va droit au but."
-    model_name = "llama-3.1-8b-instant"
+    system_instruction = "Tu es Nairu. Réponds de manière ultra rapide, concise, claire et directe, va droit au but."
+    model_name = "gemma2-9b-it"
 
 elif option == "Option Réflexion 💬":
     st.sidebar.info("Mode Réflexion : Analyse profonde et structurée.")
-    system_instruction = "Tu es Néron. Prends le temps de bien analyser. Donne une réponse très détaillée, logique, technique et approfondie."
-    model_name = "llama-3.3-70b-specdec"
+    system_instruction = "Tu es Nairu. Prends le temps de bien analyser. Donne une réponse très détaillée, logique, technique et approfondie."
+    model_name = "gemma2-9b-it"
 
 elif option == "Option Passionné / Intéressé 🔥":
     st.sidebar.info("Mode Passionné : Expert auto à 100% !")
-    system_instruction = "Tu es Néron, un expert automobile absolu. Réponds avec énormément d'enthousiasme et de passion. Utilise un ton de connaisseur."
-    model_name = "llama-3.1-8b-instant"
+    system_instruction = "Tu es Nairu, un expert automobile absolu. Réponds avec énormément d'enthousiasme et de passion. Utilise un ton de connaisseur."
+    model_name = "gemma2-9b-it"
 
-# --- APPEL À L'IA (GROQ) ---
+# --- APPEL À L'IA ET AFFICHAGE EN BULLES ---
 if 'prompt' in locals() and prompt:
+    # Affichage du message de l'utilisateur dans une vraie bulle
+    with st.chat_message("user"):
+        st.write(prompt)
+
     try:
         completion = client.chat.completions.create(
             model=model_name,
@@ -156,9 +170,13 @@ if 'prompt' in locals() and prompt:
                 {"role": "system", "content": system_instruction},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.7,
+            temperature=creativite,
         )
         response_text = completion.choices[0].message.content
-        st.write(response_text)
+        
+        # Affichage de la réponse dans une bulle d'assistant avec l'icône éclair
+        with st.chat_message("assistant", avatar="⚡"):
+            st.write(response_text)
+            
     except Exception as e:
-        st.error(f"Erreur Néron (Groq) : {e}")
+        st.error(f"Erreur Nairu (Groq) : {e}")
