@@ -662,3 +662,45 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# ==============================================================================
+# --- CORRECTIF : FIX DES BORDS BLANCS SUR LA BARRE DE RECHERCHE ---
+# ==============================================================================
+
+st.markdown(
+    """
+    <style>
+    /* On nettoie le bloc global qui entoure la barre de texte */
+    div[data-testid="stChatInput"] {
+        background-color: transparent !important; /* Enlève le fond blanc qui dépasse */
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* On applique le style arrondi et l'ombre uniquement sur la vraie zone de texte interne */
+    div[data-testid="stChatInput"] textarea {
+        background-color: #ffffff !important;
+        color: #2c3e50 !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        padding: 12px 20px !important;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    /* Petit effet quand on clique sur la zone de texte */
+    div[data-testid="stChatInput"] textarea:focus {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 18px 35px rgba(0, 0, 0, 0.22) !important;
+    }
+
+    /* On cache le conteneur inutile qui forçait la couleur blanche derrière */
+    div[data-testid="stChatInput"] > div {
+        background-color: transparent !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
