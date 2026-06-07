@@ -1,24 +1,32 @@
-import streamlit as st
-from groq import Groq
+import json
+import os
 
-# ==============================================================================
-# --- INTERRUPTEUR DE MAINTENANCE (METTRE À True POUR ACTIVER) ---
-# ==============================================================================
-MAINTENANCE_ACTIVE = True
+DB_FILE = "utilisateurs.json"
 
-if MAINTENANCE_ACTIVE:
-    st.set_page_config(page_title="Nairu - Maintenance", page_icon="🛠️", layout="centered")
-    
-    st.markdown("<br><br><br>", unsafe_allow_html=True)
-    st.title("🛠️ Site en maintenance")
-    st.subheader("Nairu s'offre une petite révision !")
-    st.info(
-        "L'application est actuellement en cours de mise à jour pour tout l'après-midi. "
-        "Nous préparons de nouvelles fonctionnalités et optimisons les performances de l'IA."
-    )
-    st.markdown("---")
-    st.write("⏳ **Retour prévu en fin de journée.** Merci pour votre patience !")
-    st.link_button("💬 Me contacter sur Instagram", "https://instagram.com/Eliott31tls")
-    
-    st.stop() # Bloque le reste du code en dessous
-# ==============================================================================
+def charger_utilisateurs():
+    if not os.path.exists(DB_FILE):
+        # Compte exemple par défaut avec un faux email pour la structure
+        default_db = {
+            "exemple": {
+                "email": "exemple@nairu.com",
+                "password": "exemple"
+            }
+        }
+        with open(DB_FILE, "w", encoding="utf-8") as f:
+            json.dump(default_db, f, indent=4)
+        return default_db
+    try:
+        with open(DB_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def sauvegarder_utilisateur(username, email, password):
+    comptes = charger_utilisateurs()
+    # On stocke l'email et le mot de passe sous forme de sous-dictionnaire
+    comptes[username] = {
+        "email": email,
+        "password": password
+    }
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(comptes, f, indent=4)
