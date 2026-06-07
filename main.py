@@ -254,5 +254,60 @@ st.markdown(
     }
     </style>
     """,
+
+    # ==============================================================================
+# --- ACCÈS DIRECT : BOUTON DYNAMIQUE OUVRIR / FERMER LE PANNEAU LATÉRAL ---
+# ==============================================================================
+st.markdown(
+    """
+    <style>
+    /* 1. Ciblage et re-stylisation globale du bouton (Ouvert et Fermé) */
+    [data-testid="stSidebarCollapseButton"] button,
+    .stApp > button {
+        background-color: #151d30 !important;
+        border: 1px solid rgba(0, 240, 255, 0.3) !important;
+        border-radius: 20px !important;
+        padding: 6px 16px !important;
+        color: #00f0ff !important;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        width: auto !important;
+        height: auto !important;
+    }
+
+    /* 2. Masquage complet des résidus de texte et d'icônes par défaut de Streamlit */
+    [data-testid="stSidebarCollapseButton"] button svg,
+    [data-testid="stSidebarCollapseButton"] button span,
+    [data-testid="stSidebarCollapseButton"] button div,
+    .stApp > button svg,
+    .stApp > button span {
+        display: none !important;
+        opacity: 0 !important;
+    }
+
+    /* 3. CAS QUAND C'EST FERMÉ : On force l'affichage de "Ouvrir ➔" */
+    [data-testid="stSidebarCollapseButton"] button::after,
+    .stApp > button::after {
+        content: "Ouvrir ➔" !important;
+        display: inline-block !important;
+    }
+
+    /* 4. CAS QUAND C'EST OUVERT : On bascule sur "Fermer ✕" */
+    .stApp:has([data-testid="stSidebar"][aria-expanded="true"]) [data-testid="stSidebarCollapseButton"] button::after {
+        content: "Fermer ✕" !important;
+    }
+
+    /* 5. Effet de lueur au survol */
+    [data-testid="stSidebarCollapseButton"] button:hover,
+    .stApp > button:hover {
+        background-color: #00f0ff !important;
+        color: #070a10 !important;
+        box-shadow: 0 0 12px rgba(0, 240, 255, 0.4) !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+
     unsafe_allow_html=True
 )
