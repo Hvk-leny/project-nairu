@@ -214,11 +214,13 @@ if 'prompt' in locals() and prompt:
     except Exception as e:
         st.error(f"Erreur Nairu (Groq) : {e}")
 
-# --- AFFICHAGE DE L'HEURE SOUS LA BARRE DE SAISIE ---
+# --- AFFICHAGE DE L'HEURE DE FRANCE SOUS LA BARRE DE SAISIE ---
 import datetime
+from zoneinfo import ZoneInfo
 
-# Récupération de l'heure actuelle
-heure_actuelle = datetime.datetime.now().strftime("%H:%M")
+# Récupération de l'heure avec le fuseau horaire de Paris/France
+fuseau_france = ZoneInfo("Europe/Paris")
+heure_actuelle = datetime.datetime.now(fuseau_france).strftime("%H:%M")
 
 # Alignement à droite en petit texte sous la barre
 st.markdown(
