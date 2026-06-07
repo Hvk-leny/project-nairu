@@ -229,51 +229,69 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 # ==============================================================================
-# --- EFFET HOVER ULTRA-ROBUSTE : BARRE LATÉRALE AU SURVOL DE LA SOURIS ---
+# --- DESIGN ÉPURÉ ET MODERNE DE LA BARRE LATÉRALE ---
 # ==============================================================================
 st.markdown(
     """
     <style>
-    /* 1. On force la barre latérale à être visible et on la décale à gauche */
+    /* 1. SÉCURITÉ : Blocage définitif des textes d'icônes buggués */
+    [data-testid="stIconMaterial"] {
+        font-size: 0px !important;
+        color: transparent !important;
+        display: none !important;
+    }
+
+    /* 2. FOND DE LA BARRE LATÉRALE : Épuré et Sombre */
     [data-testid="stSidebar"] {
-        position: fixed !important;
-        top: 0 !important;
-        left: -320px !important;
-        width: 320px !important;
-        height: 100vh !important;
-        z-index: 999990 !important;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        transform: translateX(0) !important;
-        background-color: #151d30 !important;
+        background-color: #0f1319 !important; /* Un noir bleuté très classe */
+        border-right: 1px solid rgba(255, 255, 255, 0.05) !important; /* Ligne de séparation très fine */
     }
 
-    /* 2. Zone de détection invisible de 50px sur le bord gauche de l'écran */
-    .stApp {
-        position: relative !important;
-    }
-    
-    .stApp::before {
-        content: "" !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 50px !important;
-        height: 100vh !important;
-        z-index: 999980 !important;
-        background: transparent !important;
+    /* 3. STYLISATION DES EN-TÊTES ET TITRES (Créateur, Paramètres...) */
+    [data-testid="stSidebar"] h1, 
+    [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] .stMarkdown p {
+        color: #e2e8f0 !important;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
 
-    /* 3. Déclenchement de l'ouverture quand la souris approche du bord gauche */
-    .stApp:hover [data-testid="stSidebar"],
-    [data-testid="stSidebar"]:hover {
-        transform: translateX(320px) !important;
+    /* 4. DESIGN DES BOUTONS EN CAPSULE (Déconnexion, etc.) */
+    [data-testid="stSidebar"] button {
+        background-color: #171e29 !important;
+        border: 1px solid rgba(0, 240, 255, 0.2) !important;
+        border-radius: 12px !important; /* Angles adoucis style capsule */
+        color: #00f0ff !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease-in-out !important;
     }
 
-    /* 4. On s'assure que la zone principale occupe tout l'écran */
-    [data-testid="stMain"] {
-        margin-left: 0 !important;
-        width: 100% !important;
+    [data-testid="stSidebar"] button:hover {
+        background-color: #00f0ff !important;
+        color: #0f1319 !important;
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3) !important;
+        border-color: #ffffff !important;
+    }
+
+    /* 5. DESIGN DES GLISSIÈRES ET AVANCEMENT (Créativité...) */
+    [data-testid="stSidebar"] .stSlider [data-styled-id] {
+        background-color: #00f0ff !important;
+    }
+
+    /* 6. STYLE DES OPTIONS REPTILE (Boutons Radio / Checkbox) */
+    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
+        background-color: #131822 !important;
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        margin-bottom: 6px !important;
+        border: 1px solid rgba(255, 255, 255, 0.02) !important;
+        transition: border 0.2s ease !important;
+    }
+
+    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {
+        border-color: rgba(0, 240, 255, 0.3) !important;
     }
     </style>
     """,
