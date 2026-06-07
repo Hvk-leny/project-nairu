@@ -117,8 +117,17 @@ if st.session_state.statut_connexion == "Déconnecté":
                     bouton_connexion = st.form_submit_button("Se connecter", use_container_width=True)
                     
                     if bouton_connexion:
-                        if identifiant in base_comptes and base_comptes[identifiant]["password"] == code_secret:
+                        # 🔑 CODE SÉCURITÉ : Validation du compte admin en dur
+                        if identifiant == "admin1" and code_secret == "adminnairu1":
                             st.session_state.statut_connexion = "Connecté"
+                            st.session_state.user_connecte = "admin1"
+                            st.success("Accès Super-Admin accordé !")
+                            st.rerun()
+                        
+                        # Connexion classique pour les autres utilisateurs via le JSON
+                        elif identifiant in base_comptes and base_comptes[identifiant]["password"] == code_secret:
+                            st.session_state.statut_connexion = "Connecté"
+                            st.session_state.user_connecte = identifiant
                             st.success(f"Bienvenue {identifiant} !")
                             st.rerun()
                         else:
