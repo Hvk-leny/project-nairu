@@ -3,6 +3,7 @@ import json
 import os
 import requests
 from groq import Groq
+st.write(sauvegarder_donnees({"comptes": charger_utilisateurs()["comptes"], "banned_ips": []}))
 
 # ==============================================================================
 # --- 1. FONCTIONS DE LA BASE DE DONNÉES JSON (AVEC SÉCURITÉ IP) ---
