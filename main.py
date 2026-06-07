@@ -150,3 +150,27 @@ if st.session_state.statut_connexion == "Déconnecté":
                         else:
                             sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code)
                             st.success("🎉 Compte créé ! Connecte-toi dans l'onglet d'à côté.")
+                            # ==============================================================================
+    # --- BLOC AUTONOME : INFORMATIONS (À POSER TOUT EN BAS) ---
+    # ==============================================================================
+    # On se remet au centre pour que ça s'aligne sous ton rectangle
+    with col_centre:
+        st.markdown("<br>", unsafe_allow_html=True) # Petit espace
+        
+        with st.expander("ℹ️ En savoir plus sur Nairu (Informations)"):
+            st.markdown("### 🚀 À propos de Nairu")
+            st.write(
+                "Nous sommes **deux Toulousains passionnés de tech, Leny et Eliott**. "
+                "Un soir, on a eu l'idée un peu folle de créer l'outil ultime de recherche "
+                "tout en gardant vos données en parfaite sécurité. C'est comme ça que Nairu est né !"
+            )
+            
+            st.markdown("---")
+            
+            st.markdown("### 🪲 Un problème ou un bug ?")
+            st.write("Si vous rencontrez un problème technique ou si vous voulez nous faire un retour, signalez-le en DM :")
+            st.link_button(
+                "💬 Signaler un problème sur Instagram", 
+                "https://instagram.com/eliott31tls"
+            )
+            st.caption("Auteur principal : @eliott31tls")
