@@ -467,3 +467,112 @@ if st.session_state.statut_connexion == "Invité":
     if st.button("⬅️ Retour à la page d'accueil", use_container_width=True):
         st.session_state.statut_connexion = "Déconnecté"
         st.rerun()
+
+# ==============================================================================
+# --- EXTENSION : CHARTE GRAPHIQUE OFFICIELLE SITE LANDO NORRIS (LN5 STYLE) ---
+# ==============================================================================
+
+st.markdown(
+    """
+    <style>
+    /* 1. Fond d'écran signature : Noir mat pur du site de Lando */
+    .stApp {
+        background-color: #111112 !important;
+        background-image: radial-gradient(circle at 80% 20%, rgba(210, 255, 0, 0.05) 0%, transparent 40%), 
+                          radial-gradient(circle at 20% 80%, rgba(0, 0, 0, 0.9) 0%, transparent 60%) !important;
+        background-attachment: fixed;
+    }
+
+    /* 2. Bulles de message style LN : Minimalistes, sombres, et liseré jaune néon */
+    .stChatMessage {
+        background-color: #1a1a1c !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+        transition: border 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Quand Nairu (l'I.A.) parle : Effet Néon Jaune/Vert de Lando */
+    .stChatMessage[data-testid="stChatMessageAssistant"] {
+        border-left: 4px solid #D2FF00 !important;
+    }
+
+    /* Quand l'utilisateur parle : Style épuré avec surlignage blanc sport */
+    .stChatMessage[data-testid="stChatMessageUser"] {
+        background-color: #222225 !important;
+        border-left: 4px solid #ffffff !important;
+    }
+
+    /* 3. Barre latérale (HUD) : Look carbone sombre et ligne jaune fluo directionnelle */
+    [data-testid="stSidebar"] {
+        background-color: #0c0c0d !important;
+        border-right: 2px solid #D2FF00 !important;
+    }
+
+    /* 4. Boutons ultra-performance style Lando Norris Store */
+    .stButton>button {
+        background-color: #1a1a1c !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        font-size: 13px !important;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .stButton>button:hover {
+        background-color: #D2FF00 !important;
+        color: #111112 !important;
+        border: 1px solid #D2FF00 !important;
+        box-shadow: 0 0 20px rgba(210, 255, 0, 0.4) !important;
+        transform: translateY(-1px);
+    }
+
+    /* 5. Sliders et curseurs aux couleurs de l'écurie LN */
+    div[data-testid="stSlider"] [data-testid="stThumb"] {
+        background-color: #D2FF00 !important;
+        box-shadow: 0 0 10px rgba(210, 255, 0, 0.5) !important;
+        border-radius: 50% !important;
+    }
+    
+    div[data-testid="stSlider"] [data-testid="stTrack"] {
+        background-color: rgba(210, 255, 0, 0.2) !important;
+    }
+
+    /* 6. Typographie : Moderne, épurée et agressive (Style Mona Sans / Apple) */
+    h1, h2, h3, h4, p, span, label, li {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+        color: #efeff1 !important;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Titres en gras et surlignage de couleur fluo pour les sections importantes */
+    h1, h2, h3 {
+        font-weight: 800 !important;
+        color: #ffffff !important;
+    }
+    
+    .stSidebar subheader {
+        color: #D2FF00 !important;
+    }
+
+    /* Customisation de la barre d'input de texte */
+    div[data-testid="stChatInput"] {
+        border-radius: 12px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        background-color: #1a1a1c !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Notification de boot typée F1 / Télémétrie
+if 'lando_boot' not in st.session_state:
+    st.toast("LN5 Engine Initialized. Radio Check OK. Ready to Push.", icon="🏎️")
+    st.session_state.lando_boot = True
