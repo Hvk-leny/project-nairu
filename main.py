@@ -81,7 +81,7 @@ def chercher_web(requete):
 # 4. PANNEAU CENTRAL D'ACCUEIL ÉPURÉ
 # ==============================================================================
 if st.session_state.statut_connexion == "Déconnecté":
-    st.title("🤖 Connexion à Nairu OS")
+    st.title("bienvenue sur nairu")
     
     col_x1, col_form, col_x2 = st.columns([1, 2, 1])
     with col_form:
