@@ -231,50 +231,37 @@ st.markdown(
 )
 
 # ==============================================================================
-# --- DESIGN ÉPURÉ ET MODERNE DE LA BARRE LATÉRALE ---
+# --- STRUCTURE DE L'ÉCRAN : ZONE PRINCIPALE À GAUCHE / TASKBAR À DROITE ---
 # ==============================================================================
-st.markdown(
-    """
-    <style>
-    /* 1. SÉCURITÉ : Blocage du texte d'icône tout en laissant la barre visible */
-    [data-testid="stIconMaterial"] {
-        font-size: 0px !important;
-        color: transparent !important;
-        line-height: 0 !important;
-    }
 
-    /* 2. FOND DE LA BARRE LATÉRALE : Épuré et Sombre */
-    [data-testid="stSidebar"] {
-        background-color: #0f1319 !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
+# On crée 2 colonnes : la 1ère prend 80% de l'écran (Discussion), la 2ème prend 20% (Taskbar)
+col_discussion, col_taskbar = st.columns([4, 1])
 
-    /* 3. COULEUR DES TEXTES */
-    [data-testid="stSidebar"] h1, 
-    [data-testid="stSidebar"] h2, 
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] .stMarkdown p,
-    [data-testid="stSidebar"] label {
-        color: #e2e8f0 !important;
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
-    }
+# --- 1. ZONE DE DISCUSSION (À GAUCHE) ---
+with col_discussion:
+    st.title("💬 Discussion 1")
+    
+    # Remets ici ton code existant qui affiche les messages et le st.chat_input()
+    # Exemple :
+    # container = st.container()
+    # ...
+    st.chat_input("Écris ton message ici...")
 
-    /* 4. DESIGN DES BOUTONS EN CAPSULE */
-    [data-testid="stSidebar"] button {
-        background-color: #171e29 !important;
-        border: 1px solid rgba(0, 240, 255, 0.2) !important;
-        border-radius: 12px !important;
-        color: #00f0ff !important;
-        font-weight: 600 !important;
-        transition: all 0.2s ease-in-out !important;
-    }
-
-    [data-testid="stSidebar"] button:hover {
-        background-color: #00f0ff !important;
-        color: #0f1319 !important;
-        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3) !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# --- 2. NOUVELLE TASKBAR (À DROITE) ---
+with col_taskbar:
+    # On ajoute un petit style de conteneur épuré pour bien séparer la zone
+    st.markdown("### 🛠️ Paramètres IA")
+    
+    # Tu peux déplacer ici tes options existantes :
+    pipeline = st.radio(
+        "Pipeline :",
+        ["Option Flash ⚡", "Option Réflexion 💬", "Option Passionné 🔥"]
+    )
+    
+    internet = st.toggle("🌐 Interroger Internet", value=True)
+    
+    creativite = st.slider("☁️ Créativité :", 0.0, 1.0, 0.50)
+    
+    st.markdown("---")
+    st.markdown("### ⏳ Confidentialité")
+    mode_ephemere = st.toggle("🗑️ Mode Éphémère (72h)")
