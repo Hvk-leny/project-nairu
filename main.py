@@ -211,23 +211,34 @@ else:
         st.markdown(f'<div style="text-align: right; color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 20px;">🕒 {heure_actuelle}</div>', unsafe_allow_html=True)
 
 # ==============================================================================
-# --- FIX FINAL ET EXCLUSIF : BOUTONS CYBER OUVRIR / FERMER ---
+# --- ANTIDOTE COMPLET : PURGE DU BOUTON STREAMLIT ---
 # ==============================================================================
 st.markdown(
     """
     <style>
-    /* 1. FORCE LE CONTENEUR DU BOUTON À REPARAÎTRE */
+    /* 1. ON FORCE LE BOUTON À REPAREÎTRE EN HAUT À GAUCHE */
     [data-testid="stSidebarCollapseButton"] {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
         position: fixed !important;
-        top: 10px !important;
-        left: 10px !important;
+        top: 12px !important;
+        left: 12px !important;
         z-index: 999999 !important;
     }
 
-    /* 2. STYLE OVALE CAPSULE DU BOUTON */
+    /* 2. ON EFFACE TOUT LE CONTENU INTERNE (FLÈCHES ET TEXTES CACHÉS) */
+    [data-testid="stSidebarCollapseButton"] button div,
+    [data-testid="stSidebarCollapseButton"] button span,
+    [data-testid="stSidebarCollapseButton"] button svg {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        font-size: 0 !important;
+        width: 0 !important;
+    }
+
+    /* 3. LOOK OVALE CYBER SANS AUCUN RÉSIDU */
     [data-testid="stSidebarCollapseButton"] button {
         background-color: #151d30 !important;
         border: 1px solid rgba(0, 240, 255, 0.4) !important;
@@ -237,40 +248,34 @@ st.markdown(
         font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
         font-size: 14px !important;
         font-weight: 600 !important;
-        width: 100px !important;
+        width: 105px !important;
         height: 38px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
-        transition: all 0.2s ease !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+        text-indent: 0 !important;
     }
 
-    /* 3. MASQUAGE ABSOLU DU TEXTE BUGGUÉ DE STREAMLIT */
-    [data-testid="stSidebarCollapseButton"] button div,
-    [data-testid="stSidebarCollapseButton"] button span,
-    [data-testid="stSidebarCollapseButton"] button svg {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-    }
-
-    /* 4. TEXTE DYNAMIQUE SANS RÉSIDU */
+    /* 4. TEXTE FIXE QUAND LE PANNEAU EST FERMÉ */
     [data-testid="stSidebarCollapseButton"] button::after {
         content: "Ouvrir ➔" !important;
         display: block !important;
         color: #00f0ff !important;
+        font-size: 14px !important;
+        letter-spacing: 0.5px !important;
     }
 
+    /* 5. TEXTE FIXE QUAND LE PANNEAU EST OUVERT */
     .stApp:has([data-testid="stSidebar"][aria-expanded="true"]) [data-testid="stSidebarCollapseButton"] button::after {
         content: "Fermer ✕" !important;
     }
 
-    /* 5. EFFET AU SURVOL */
+    /* 6. EFFET AU SURVOL */
     [data-testid="stSidebarCollapseButton"] button:hover {
         background-color: #00f0ff !important;
         color: #070a10 !important;
-        box-shadow: 0 0 15px rgba(0, 240, 255, 0.5) !important;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.6) !important;
     }
     </style>
     """,
