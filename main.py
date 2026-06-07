@@ -282,4 +282,4 @@ if "current_chat" not in st.session_state: st.session_state.current_chat = "Disc
 # ==============================================================================
 def chercher_web(requete):
     try:
-        with DDGS() as ddgs:
+with DDGS() as ddgs:
