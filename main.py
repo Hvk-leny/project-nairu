@@ -85,14 +85,14 @@ if st.session_state.statut_connexion == "Déconnecté":
     
     col_x1, col_form, col_x2 = st.columns([1, 2, 1])
     with col_form:
-        tab_login, tab_guest = st.tabs(["🔒 Connexion Développeurs", "🎭 Accès Invité"])
+        tab_login, tab_guest = st.tabs(["🔒 Connexion ", "🎭 Accès Invité"])
         
         with tab_login:
             st.write("")
             nom_input = st.text_input("Identifiant ou Prénom :", key="login_name").strip().lower()
             code_input = st.text_input("Code secret :", type="password", key="login_code").strip()
             
-            if st.button("Valider l'accès Master", use_container_width=True):
+            if st.button("se connecter", use_container_width=True):
                 if nom_input in st.session_state.data["users"]:
                     if code_input == st.session_state.data["users"][nom_input]["code"]:
                         st.session_state.statut_connexion = nom_input
