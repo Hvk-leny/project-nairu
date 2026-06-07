@@ -119,8 +119,10 @@ else:
             st.session_state.data["users"][prenom]["history"].append({"role": "user", "content": prompt})
             st.session_state.data["users"][prenom]["history"].append({"role": "assistant", "content": reponse_ia})
             sauvegarder_base(st.session_state.data)
-# --- CONFIGURATION GROQ ET INTERFACE ---
+# --- CONFIGURATION GROQ ET RECHERCHE ---
 from groq import Groq
+from duckduckgo_search import DDGS
+
 client = Groq(api_key="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")
 
 st.sidebar.title("⚡ Configuration de Nairu")
@@ -131,17 +133,20 @@ option = st.sidebar.radio(
     ("Option Flash ⚡", "Option Réflexion 💬", "Option Passionné / Intéressé 🔥")
 )
 
+# Case à cocher pour activer/désactiver le web
+recherche_web = st.sidebar.toggle("🌐 Activer la recherche Internet (DuckDuckGo)", value=True)
+
 # Curseur de créativité (Temperature)
 creativite = st.sidebar.slider(
     "🧠 Niveau de créativité de l'IA :",
     min_value=0.0,
     max_value=1.0,
-    value=0.7,
+    value=0.5,
     step=0.1,
     help="Plus la valeur est haute, plus l'IA est originale et surprenante."
 )
 
-# Réglage du comportement selon l'option (Modèles Groq stables)
+# Réglage du comportement selon l'option choisie
 if option == "Option Flash ⚡":
     st.sidebar.info("Mode Flash : Réponses courtes et ultra rapides.")
     system_instruction = "Tu es Nairu. Réponds de manière ultra rapide, concise, claire et directe, va droit au but."
@@ -149,30 +154,60 @@ if option == "Option Flash ⚡":
 
 elif option == "Option Réflexion 💬":
     st.sidebar.info("Mode Réflexion : Analyse profonde et structurée.")
-    system_instruction = "Tu es Nairu. Prends le temps de bien analyser. Donne une réponse très détaillée, logique, technique et approfondie."
+    system_instruction = "Tu es Nairu. Prends le temps de bien analyser les données du web fournies pour faire une synthèse complète, logique et technique."
     model_name = "llama-3.3-70b-versatile"
 
 elif option == "Option Passionné / Intéressé 🔥":
-    st.sidebar.info("Mode Passionné : Expert auto à 100% !")
-    system_instruction = "Tu es Nairu, un expert automobile absolu. Réponds avec énormément d'enthousiasme et de passion. Utilise un ton de connaisseur."
+    st.sidebar.info("Mode Passionné : Expert automobile absolu ! Réponds avec enthousiasme.")
+    system_instruction = "Tu es Nairu, un expert automobile absolu. Réponds avec énormément d'enthousiasme et de passion. Utilise un ton de connaisseur et appuie-toi sur les infos récentes."
     model_name = "llama-3.1-8b-instant"
+
+# --- FONCTION DE RECHERCHE DUCKDUCKGO ---
+def chercher_web(requete):
+    try:
+        with DDGS() as ddgs:
+            resultats = [r for r in ddgs.text(requete, max_results=3)]
+            if resultats:
+                contexte = "\n\n".join([f"Source: {r['title']}\nContenu: {r['body']}" for r in resultats])
+                return contexte
+    except Exception:
+        return "Impossible de récupérer les données du web en temps réel."
+    return "Aucun résultat trouvé sur le web."
 
 # --- APPEL À L'IA ET AFFICHAGE EN BULLES ---
 if 'prompt' in locals() and prompt:
+    # Affichage du message de l'utilisateur dans une vraie bulle
     with st.chat_message("user"):
         st.write(prompt)
 
+    # Si la recherche est activée, on va chercher sur DuckDuckGo
+    contexte_web = ""
+    if recherche_web:
+        with st.spinner("🔍 Recherche sur DuckDuckGo en cours..."):
+            contexte_web = chercher_web(prompt)
+
     try:
+        # Préparation des messages pour l'IA
+        messages_ia = [{"role": "system", "content": system_instruction}]
+        
+        # Si on a des infos du web, on les injecte pour donner le contexte récent
+        if contexte_web:
+            messages_ia.append({
+                "role": "system", 
+                "content": f"Voici les données actuelles trouvées sur Internet (nous sommes en 2026) pour t'aider à répondre avec précision :\n{contexte_web}"
+            })
+            
+        messages_ia.append({"role": "user", "content": prompt})
+
+        # Appel API Groq
         completion = client.chat.completions.create(
             model=model_name,
-            messages=[
-                {"role": "system", "content": system_instruction},
-                {"role": "user", "content": prompt}
-            ],
+            messages=messages_ia,
             temperature=creativite,
         )
         response_text = completion.choices[0].message.content
         
+        # Affichage de la réponse de Nairu dans sa bulle avec l'icône éclair
         with st.chat_message("assistant", avatar="⚡"):
             st.write(response_text)
             
