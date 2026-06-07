@@ -705,5 +705,3 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
-                    st.error("⚠️ Veuillez remplir tous les champs pour créer un compte.")
