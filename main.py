@@ -7,126 +7,33 @@ from groq import Groq
 from duckduckgo_search import DDGS
 
 # ==============================================================================
-# 1. CONFIGURATION DE LA PAGE & NOUVEAU DESIGN CYBER MINIMALISTE
+# 1. CONFIGURATION DE LA PAGE & DESIGN TECH MINIMALISTE
 # ==============================================================================
 st.set_page_config(page_title="NAIRU - AI", page_icon="🤖", layout="wide")
 
 st.markdown(
     """
     <style>
-    /* Fond global sombre et net */
-    .stApp {
-        background-color: #0b0f17 !important;
-        background-image: radial-gradient(circle at top right, #111827 0%, #070a10 100%) !important;
-    }
-
-    /* Barre latérale accentuée */
-    [data-testid="stSidebar"] {
-        background-color: #0f1420 !important;
-        border-right: 1px solid rgba(0, 240, 255, 0.15) !important;
-    }
-
-    /* Bulles de chat design capsule futuriste */
+    .stApp { background-color: #0d1117 !important; }
+    [data-testid="stSidebar"] { background-color: #161b22 !important; border-right: 1px solid #30363d !important; }
     [data-testid="stChatMessage"] {
-        background-color: #151d30 !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        border-radius: 16px !important;
-        padding: 16px !important;
+        background-color: #161b22 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 12px !important;
+        padding: 18px !important;
         margin-bottom: 12px !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     }
-    
-    /* Bulle de l'utilisateur avec lueur bleue discrète */
-    [data-testid="stChatMessageUser"] {
-        background-color: #1e293b !important;
-        border: 1px solid rgba(56, 139, 253, 0.4) !important;
-        box-shadow: 0 0 15px rgba(56, 139, 253, 0.1) !important;
-    }
-
-    /* Fix de la barre de recherche ovale sans bords blancs */
-    div[data-testid="stChatInput"] {
-        background-color: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-    }
+    [data-testid="stChatMessageUser"] { background-color: #21262d !important; border: 1px solid #388bfd !important; }
+    div[data-testid="stChatInput"] { background-color: transparent !important; border: none !important; box-shadow: none !important; }
     div[data-testid="stChatInput"] textarea {
-        background-color: #0f1420 !important;
-        color: #e2e8f0 !important;
-        border-radius: 30px !important;
-        border: 1px solid rgba(0, 240, 255, 0.2) !important;
-        padding: 14px 24px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
-        transition: border-color 0.3s ease !important;
+        background-color: #161b22 !important;
+        color: #c9d1d9 !important;
+        border-radius: 24px !important;
+        border: 1px solid #30363d !important;
+        padding: 12px 20px !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
     }
-    div[data-testid="stChatInput"] textarea:focus {
-        border-color: #00f0ff !important;
-    }
-
-    /* Typographies et titres */
-    h1, h2, h3, h4, p, span, label, li {
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
-        color: #cbd5e1 !important;
-    }
-    h1, h2, h3 {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-    }
-
-    /* Boutons Tech */
-    .stButton>button {
-        background-color: #151d30 !important;
-        color: #00f0ff !important;
-        border: 1px solid rgba(0, 240, 255, 0.3) !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-    }
-    .stButton>button:hover {
-        background-color: #00f0ff !important;
-        color: #070a10 !important;
-        box-shadow: 0 0 15px rgba(0, 240, 255, 0.4) !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-        color: #e2e8f0 !important;
-        border-radius: 30px !important;
-        border: 1px solid rgba(0, 240, 255, 0.2) !important;
-        padding: 14px 24px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
-        transition: border-color 0.3s ease !important;
-    }
-    div[data-testid="stChatInput"] textarea:focus {
-        border-color: #00f0ff !important;
-    }
-
-    /* Typographies et titres */
-    h1, h2, h3, h4, p, span, label, li {
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
-        color: #cbd5e1 !important;
-    }
-    h1, h2, h3 {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-    }
-
-    /* Boutons Tech */
-    .stButton>button {
-        background-color: #151d30 !important;
-        color: #00f0ff !important;
-        border: 1px solid rgba(0, 240, 255, 0.3) !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-    }
-    .stButton>button:hover {
-        background-color: #00f0ff !important;
-        color: #070a10 !important;
-        box-shadow: 0 0 15px rgba(0, 240, 255, 0.4) !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+    h1, h2, h3, h4, p, span, label, li { font-family: -apple-system, BlinkMacSystemFont, sans-serif !important; color: #c9d1d9 !important; }
     h1, h2, h3 { color: #ffffff !important; font-weight: 600 !important; }
     .stButton>button { background-color: #21262d !important; color: #c9d1d9 !important; border: 1px solid #30363d !important; border-radius: 6px !important; }
     .stButton>button:hover { background-color: #30363d !important; color: #ffffff !important; }
@@ -305,31 +212,3 @@ else:
         fuseau_france = ZoneInfo("Europe/Paris")
         heure_actuelle = datetime.datetime.now(fuseau_france).strftime("%H:%M")
         st.markdown(f'<div style="text-align: right; color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 20px;">🕒 {heure_actuelle}</div>', unsafe_allow_html=True)
-
-# ==============================================================================
-# --- CORRECTIF : NETTOYAGE DU MENU PARAMÈTRES STREAMLIT (HAUT À DROITE) ---
-# ==============================================================================
-
-st.markdown(
-    """
-    <style>
-    /* Force les textes parasites du menu de configuration à se masquer proprement */
-    div[data-testid="stMainMenu"] span, 
-    div[role="menuitem"] span {
-        text-shadow: none !important;
-        letter-spacing: normal !important;
-    }
-    
-    /* Corrige les labels qui fusionnent en haut du sélecteur de thème */
-    div[data-testid="stMainMenu"] label {
-        display: none !important; /* Masque les titres bruts qui se superposent */
-    }
-
-    /* Remet la police par défaut uniquement pour le menu Streamlit pour éviter les bugs */
-    div[role="dialog"], div[role="menu"] {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
