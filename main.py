@@ -135,12 +135,12 @@ option = st.sidebar.radio(
 if option == "Option Flash ⚡":
     st.sidebar.info("Mode Flash : Réponses courtes et ultra rapides.")
     system_instruction = "Tu es Néron. Réponds de manière ultra rapide, concise, claire et directe, va droit au but."
-    model_name = "gemini-1.5-flash"
+    model_name = "models/gemini-1.5-flash"
     
 elif option == "Option Réflexion 🧠":
     st.sidebar.info("Mode Réflexion : Analyse profonde et structurée.")
     system_instruction = "Tu es Néron. Prends le temps de bien analyser. Donne une réponse très détaillée, logique, technique et approfondie."
-    model_name = "gemini-1.5-pro" # Modèle plus puissant pour la réflexion
+    model_name = "gemini-1.5-flash" # Modèle plus puissant pour la réflexion
     
 elif option == "Option Passionné / Intéressé 🔥":
     st.sidebar.info("Mode Passionné : Expert auto à 100% !")
