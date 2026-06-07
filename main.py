@@ -239,13 +239,13 @@ st.markdown(
     [data-testid="stSidebar"] {
         position: fixed !important;
         top: 0 !important;
-        left: -320px !important; /* Totalement cachée hors écran */
+        left: -320px !important;
         width: 320px !important;
         height: 100vh !important;
         z-index: 999990 !important;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         transform: translateX(0) !important;
-        background-color: #151d30 !important; /* Optionnel : aligné sur ton design sombre */
+        background-color: #151d30 !important;
     }
 
     /* 2. Zone de détection invisible de 50px sur le bord gauche de l'écran */
@@ -258,7 +258,7 @@ st.markdown(
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
-        width: 50px !important; /* Zone d'approche de la souris */
+        width: 50px !important;
         height: 100vh !important;
         z-index: 999980 !important;
         background: transparent !important;
@@ -267,7 +267,7 @@ st.markdown(
     /* 3. Déclenchement de l'ouverture quand la souris approche du bord gauche */
     .stApp:hover [data-testid="stSidebar"],
     [data-testid="stSidebar"]:hover {
-        transform: translateX(320px) !important; /* Glisse proprement vers la droite */
+        transform: translateX(320px) !important;
     }
 
     /* 4. On s'assure que la zone principale occupe tout l'écran */
@@ -277,7 +277,5 @@ st.markdown(
     }
     </style>
     """,
-    unsafe_allow_html=True
-)
     unsafe_allow_html=True
 )
