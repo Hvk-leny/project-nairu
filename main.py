@@ -236,33 +236,34 @@ st.markdown(
 st.markdown(
     """
     <style>
-    /* 1. SÉCURITÉ : Blocage définitif des textes d'icônes buggués */
+    /* 1. SÉCURITÉ : Blocage du texte d'icône tout en laissant la barre visible */
     [data-testid="stIconMaterial"] {
         font-size: 0px !important;
         color: transparent !important;
-        display: none !important;
+        line-height: 0 !important;
     }
 
     /* 2. FOND DE LA BARRE LATÉRALE : Épuré et Sombre */
     [data-testid="stSidebar"] {
-        background-color: #0f1319 !important; /* Un noir bleuté très classe */
-        border-right: 1px solid rgba(255, 255, 255, 0.05) !important; /* Ligne de séparation très fine */
+        background-color: #0f1319 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* 3. STYLISATION DES EN-TÊTES ET TITRES (Créateur, Paramètres...) */
+    /* 3. COULEUR DES TEXTES */
     [data-testid="stSidebar"] h1, 
     [data-testid="stSidebar"] h2, 
     [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] .stMarkdown p {
+    [data-testid="stSidebar"] .stMarkdown p,
+    [data-testid="stSidebar"] label {
         color: #e2e8f0 !important;
         font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
 
-    /* 4. DESIGN DES BOUTONS EN CAPSULE (Déconnexion, etc.) */
+    /* 4. DESIGN DES BOUTONS EN CAPSULE */
     [data-testid="stSidebar"] button {
         background-color: #171e29 !important;
         border: 1px solid rgba(0, 240, 255, 0.2) !important;
-        border-radius: 12px !important; /* Angles adoucis style capsule */
+        border-radius: 12px !important;
         color: #00f0ff !important;
         font-weight: 600 !important;
         transition: all 0.2s ease-in-out !important;
@@ -272,28 +273,10 @@ st.markdown(
         background-color: #00f0ff !important;
         color: #0f1319 !important;
         box-shadow: 0 0 10px rgba(0, 240, 255, 0.3) !important;
-        border-color: #ffffff !important;
-    }
-
-    /* 5. DESIGN DES GLISSIÈRES ET AVANCEMENT (Créativité...) */
-    [data-testid="stSidebar"] .stSlider [data-styled-id] {
-        background-color: #00f0ff !important;
-    }
-
-    /* 6. STYLE DES OPTIONS REPTILE (Boutons Radio / Checkbox) */
-    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
-        background-color: #131822 !important;
-        padding: 8px 12px !important;
-        border-radius: 8px !important;
-        margin-bottom: 6px !important;
-        border: 1px solid rgba(255, 255, 255, 0.02) !important;
-        transition: border 0.2s ease !important;
-    }
-
-    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {
-        border-color: rgba(0, 240, 255, 0.3) !important;
     }
     </style>
     """,
+    unsafe_allow_html=True
+)
     unsafe_allow_html=True
 )
