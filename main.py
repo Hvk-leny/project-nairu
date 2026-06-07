@@ -3,7 +3,6 @@ import json
 import os
 import requests
 from groq import Groq
-st.write(sauvegarder_donnees({"comptes": charger_utilisateurs()["comptes"], "banned_ips": []}))
 
 # ==============================================================================
 # --- 1. FONCTIONS DE LA BASE DE DONNÉES JSON (AVEC SÉCURITÉ IP) ---
@@ -250,4 +249,6 @@ else:
     if st.button("🔴 Déconnexion", use_container_width=True):
         st.session_state.statut_connexion = "Déconnecté"
         st.session_state.user_connecte = None
+        
         st.rerun()
+sauvegarder_donnees({"comptes": charger_utilisateurs()["comptes"], "banned_ips": []})
