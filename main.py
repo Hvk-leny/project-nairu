@@ -187,42 +187,55 @@ else:
         with st.sidebar:
             st.markdown("### 🛠️ Mode Administrateur")
             st.info(f"Connecté en tant que : {st.session_state.user_connecte}")
+            
             if st.checkbox("Voir la gestion des comptes"):
                 data_totale = charger_utilisateurs()
-                st.write(data_totale["comptes"])
+                st.markdown("#### 👥 Modération des comptes")
+                
+                # On parcourt la liste des comptes du JSON
+                for nom, infos in list(data_totale["comptes"].items()):
+                    # On ne touche pas aux comptes système/permanents
+                    if nom not in ["admin1", "leny", "eliott", "exemple"]:
+                        st.markdown(f"**Identifiant :** `{nom}`")
+                        st.caption(f"IP : {infos.get('ip', '0.0.0.0')} | Email : {infos.get('email', 'N/A')}")
+                        
+                        col_btn_ban, col_btn_del = st.columns(2)
+                        
+                        with col_btn_ban:
+                            if st.button(f"🚫 Bannir", key=f"ban_{nom}", use_container_width=True):
+                                user_ip_to_ban = infos.get('ip')
+                                if user_ip_to_ban and user_ip_to_ban not in data_totale["banned_ips"]:
+                                    data_totale["banned_ips"].append(user_ip_to_ban)
+                                del data_totale["comptes"][nom]
+                                sauvegarder_donnees(data_totale)
+                                st.success(f"Banni !")
+                                st.rerun()
+                                
+                        with col_btn_del:
+                            if st.button(f"🗑️ Supprimer", key=f"del_{nom}", use_container_width=True):
+                                del data_totale["comptes"][nom]
+                                sauvegarder_donnees(data_totale)
+                                st.success(f"Supprimé !")
+                                st.rerun()
+                        st.markdown("---")
+                
+                # --- AFFICHAGE ET GESTION DES IP BANNIES ---
+                st.markdown("#### 🛑 IP Bloquées")
+                if not data_totale.get("banned_ips"):
+                    st.write("*Aucune IP bloquée.*")
+                else:
+                    for ip in data_totale["banned_ips"]:
+                        col_ip_text, col_ip_unban = st.columns([2, 1])
+                        with col_ip_text:
+                            st.code(ip)
+                        with col_ip_unban:
+                            if st.button("🔓", key=f"unban_{ip}", use_container_width=True):
+                                data_totale["banned_ips"].remove(ip)
+                                sauvegarder_donnees(data_totale)
+                                st.success("Débloquée")
+                                st.rerun()
 
     # 🟢 CHAT IA POUR TOUT LE MONDE
     st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
-    
-    for msg in st.session_state.messages_chat:
-        with st.chat_message(msg["role"]):
-            st.write(msg["content"])
-    
-    prompt_utilisateur = st.chat_input("Posez votre question à Nairu...")
-    
-    if prompt_utilisateur:
-        with st.chat_message("user"):
-            st.write(prompt_utilisateur)
-        st.session_state.messages_chat.append({"role": "user", "content": prompt_utilisateur})
-        
-        try:
-            client_groq = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            with st.chat_message("assistant"):
-                with st.spinner("Nairu fouille le web et réfléchit..."):
-                    contexte_web = executer_recherche_web(prompt_utilisateur)
-                    system_instruction = f"Tu es Nairu, une IA de recherche créée par Leny et Eliott. Utilise ces infos web si besoin : {contexte_web}"
-                    
-                    historique_complet = [{"role": "system", "content": system_instruction}] + st.session_state.messages_chat
-                    reponse_brute = client_groq.chat.completions.create(model="llama3-8b-8192", messages=historique_complet)
-                    texte_reponse = reponse_brute.choices[0].message.content
-                    st.write(texte_reponse)
-            st.session_state.messages_chat.append({"role": "assistant", "content": texte_reponse})
-        except:
-            st.error("❌ Erreur de clé API Groq.")
-
-    st.markdown("<br><hr>", unsafe_allow_html=True)
-    if st.button("🔴 Déconnexion", use_container_width=True):
-        st.session_state.statut_connexion = "Déconnecté"
-        st.session_state.user_connecte = None
         st.session_state.messages_chat = []
         st.rerun()
