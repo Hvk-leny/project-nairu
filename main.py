@@ -211,33 +211,19 @@ else:
         st.markdown(f'<div style="text-align: right; color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 20px;">🕒 {heure_actuelle}</div>', unsafe_allow_html=True)
 
 # ==============================================================================
-# --- ATOMISATION FINALE ET RADICALE DU TEXTE BUGGUÉ ---
+# --- CORRECTION FINALE : SÉCURISATION DES ICÔNES TEXTUELLES ---
 # ==============================================================================
 st.markdown(
     """
     <style>
-    /* 1. On cible absolument TOUT sur la page qui contient le mot maudit et on l'efface */
-    div:has-text("arrow"), 
-    span:has-text("arrow"), 
-    p:has-text("arrow"),
-    div:has-text("ouble"), 
-    span:has-text("ouble"), 
-    p:has-text("ouble") {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
+    /* On cible le composant exact que Streamlit utilise pour afficher ses icônes */
+    [data-testid="stIconMaterial"] {
         font-size: 0px !important;
-    }
-
-    /* 2. Sécurité supplémentaire si Streamlit l'injecte dans une classe spécifique */
-    .stApp div:contains("arrow"),
-    .stApp span:contains("arrow"),
-    .stApp div:contains("ouble"),
-    .stApp span:contains("ouble") {
+        color: transparent !important;
+        line-height: 0 !important;
         display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        font-size: 0px !important;
+        width: 0 !important;
+        height: 0 !important;
     }
     </style>
     """,
