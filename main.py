@@ -141,25 +141,24 @@ creativite = st.sidebar.slider(
     help="Plus la valeur est haute, plus l'IA est originale et surprenante."
 )
 
-# Réglage du comportement selon l'option (Nom officiel : Nairu)
+# Réglage du comportement selon l'option (Modèles Groq stables)
 if option == "Option Flash ⚡":
     st.sidebar.info("Mode Flash : Réponses courtes et ultra rapides.")
     system_instruction = "Tu es Nairu. Réponds de manière ultra rapide, concise, claire et directe, va droit au but."
-    model_name = "gemma2-9b-it"
+    model_name = "llama-3.1-8b-instant"
 
 elif option == "Option Réflexion 💬":
     st.sidebar.info("Mode Réflexion : Analyse profonde et structurée.")
     system_instruction = "Tu es Nairu. Prends le temps de bien analyser. Donne une réponse très détaillée, logique, technique et approfondie."
-    model_name = "gemma2-9b-it"
+    model_name = "llama-3.3-70b-versatile"
 
 elif option == "Option Passionné / Intéressé 🔥":
     st.sidebar.info("Mode Passionné : Expert auto à 100% !")
     system_instruction = "Tu es Nairu, un expert automobile absolu. Réponds avec énormément d'enthousiasme et de passion. Utilise un ton de connaisseur."
-    model_name = "gemma2-9b-it"
+    model_name = "llama-3.1-8b-instant"
 
 # --- APPEL À L'IA ET AFFICHAGE EN BULLES ---
 if 'prompt' in locals() and prompt:
-    # Affichage du message de l'utilisateur dans une vraie bulle
     with st.chat_message("user"):
         st.write(prompt)
 
@@ -174,7 +173,6 @@ if 'prompt' in locals() and prompt:
         )
         response_text = completion.choices[0].message.content
         
-        # Affichage de la réponse dans une bulle d'assistant avec l'icône éclair
         with st.chat_message("assistant", avatar="⚡"):
             st.write(response_text)
             
