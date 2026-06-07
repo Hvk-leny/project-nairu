@@ -211,27 +211,33 @@ else:
         st.markdown(f'<div style="text-align: right; color: #8b949e; font-family: monospace; font-size: 12px; margin-top: 20px;">🕒 {heure_actuelle}</div>', unsafe_allow_html=True)
 
 # ==============================================================================
-# --- ATOMISATION EXCLUSIVE DU TEXTE DOUBLE_ARROW ---
+# --- ATOMISATION FINALE ET RADICALE DU TEXTE BUGGUÉ ---
 # ==============================================================================
 st.markdown(
     """
     <style>
-    /* On cible le conteneur du bouton et on force TOUT son texte interne à devenir invisible et minuscule */
-    [data-testid="stSidebarCollapseButton"] button,
-    [data-testid="stSidebarCollapseButton"] button div,
-    [data-testid="stSidebarCollapseButton"] button span {
+    /* 1. On cible absolument TOUT sur la page qui contient le mot maudit et on l'efface */
+    div:has-text("arrow"), 
+    span:has-text("arrow"), 
+    p:has-text("arrow"),
+    div:has-text("ouble"), 
+    span:has-text("ouble"), 
+    p:has-text("ouble") {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
         font-size: 0px !important;
-        color: transparent !important;
-        line-height: 0 !important;
-        text-indent: -9999px !important;
     }
 
-    /* On s'assure que si Streamlit injecte le texte brute, il soit masqué de force */
-    :not(input):not(textarea):contains("arrow"), 
-    :not(input):not(textarea):contains("ouble") {
-        font-size: 0px !important;
-        color: transparent !important;
+    /* 2. Sécurité supplémentaire si Streamlit l'injecte dans une classe spécifique */
+    .stApp div:contains("arrow"),
+    .stApp span:contains("arrow"),
+    .stApp div:contains("ouble"),
+    .stApp span:contains("ouble") {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        font-size: 0px !important;
     }
     </style>
     """,
