@@ -385,58 +385,75 @@ st.markdown(
 )
 
 # ==============================================================================
-# --- EXTENSION : CANAL DE COMMUNICATION PRIVÉ (ELIOTT & LENY) ---
+# --- EXTENSION : MODE INVITÉ (OPTION DM INSTA OU PRÉSENTATION) ---
 # ==============================================================================
 
 st.sidebar.write("---")
-st.sidebar.subheader("📡 Canal Équipe")
+st.sidebar.subheader("👤 Espace Connexion")
 
-# Initialisation de la boîte de réception dans la mémoire du site
-if "messages_equipe" not in st.session_state:
-    st.session_state.messages_equipe = [
-        {"auteur": "Système", "texte": "Bienvenue dans le canal privé de Nairu Dev.", "heure": "00:00"}
-    ]
+# Initialisation du statut si non existant
+if "statut_connexion" not in st.session_state:
+    st.session_state.statut_connexion = "Déconnecté"
 
-# Sélection de l'utilisateur qui parle
-qui_parle = st.sidebar.selectbox("Tu es :", ("Eliott", "Leny"))
-
-# Zone pour taper le message dans la barre latérale
-texte_message = st.sidebar.text_input("💬 Message pour ton binôme :", key="input_equipe")
-
-if st.sidebar.button("🚀 Envoyer à l'équipe", use_container_width=True):
-    if texte_message:
-        # Récupération de l'heure locale française
-        from zoneinfo import ZoneInfo
-        import datetime
-        heure_fr = datetime.datetime.now(ZoneInfo("Europe/Paris")).strftime("%H:%M")
-        
-        # Ajout du message dans la liste
-        st.session_state.messages_equipe.append({
-            "auteur": qui_parle,
-            "texte": texte_message,
-            "heure": heure_fr
-        })
+# Bouton pour activer le mode invité
+if st.session_state.statut_connexion == "Déconnecté":
+    if st.sidebar.button("🎭 Se connecter en tant qu'invité", use_container_width=True):
+        st.session_state.statut_connexion = "Invité"
         st.rerun()
 
-# Bouton pour afficher la boîte de réception à l'écran
-if st.sidebar.checkbox("📂 Ouvrir la radio d'équipe"):
+# Interface du Mode Invité
+if st.session_state.statut_connexion == "Invité":
     st.write("---")
-    st.subheader("📟 Messages internes (Eliott 🤝 Leny)")
     
-    # Affichage des messages du plus récent au plus ancien
-    for msg in reversed(st.session_state.messages_equipe):
-        if msg["auteur"] == "Système":
-            st.caption(f"⚙️ {msg['texte']}")
-        else:
-            couleur = "#00b4d8" if msg["auteur"] == "Eliott" else "#ffb703"
-            st.markdown(
-                f"""
-                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid {couleur};">
-                    <span style="color: {couleur}; font-weight: bold;">{msg['auteur']}</span> 
-                    <span style="color: gray; font-size: 10px;">[{msg['heure']}]</span><br>
-                    <span style="color: #ffffff;">{msg['texte']}</span>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-            
+    st.markdown(
+        """
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 18px; border: 1px solid rgba(0, 180, 216, 0.2); text-align: center; margin-bottom: 25px;">
+            <h3 style="color: #00b4d8; margin-top: 0; margin-bottom: 5px;">✨ Bienvenue sur Nairu AI</h3>
+            <p style="color: #gray; font-size: 14px; margin: 0;">Mode Invité • Accès Découverte</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # Séparation en deux colonnes : DM Insta ou Présentation
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(
+            """
+            <div style="background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center; height: 100%;">
+                <p style="font-size: 30px; margin: 0;">📩</p>
+                <h4 style="margin: 10px 0 5px 0; color: #ffffff;">Nous contacter</h4>
+                <p style="font-size: 13px; color: #a0a0a0; margin-bottom: 20px;">Tu as une question, une idée, ou tu veux ton propre compte d'accès ? Envoie un DM !</p>
+                <a href="https://www.instagram.com/eliott31tls" target="_blank" style="text-decoration: none;">
+                    <button style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(230, 104, 60, 0.3);">
+                        DM sur @eliott31tls
+                    </button>
+                </a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+    with col2:
+        st.markdown(
+            """
+            <div style="background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); height: 100%;">
+                <p style="font-size: 30px; margin: 0; text-align: center;">🤖</p>
+                <h4 style="margin: 10px 0 10px 0; color: #ffffff; text-align: center;">Présentation de l'IA</h4>
+                <p style="font-size: 13px; color: #e0e1dd; margin-bottom: 5px;"><b>Nairu</b> est un assistant virtuel intelligent de dernière génération conçu pour être performant, fluide et stylé.</p>
+                <ul style="font-size: 12px; color: #a0a0a0; padding-left: 15px; margin: 0;">
+                    <li>⚡ <b>Moteur Groq :</b> Réponses instantanées.</li>
+                    <li>🌐 <b>Recherche Web :</b> Connecté à Internet.</li>
+                    <li>🔥 <b>Mode Passionné :</b> Expert en mécanique et automobile.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # Bouton pour faire machine arrière
+    st.write("")
+    if st.button("⬅️ Retour à la page de connexion", use_container_width=True):
+        st.session_state.statut_connexion = "Déconnecté"
+        st.rerun()
