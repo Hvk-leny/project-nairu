@@ -375,3 +375,78 @@ else:
         st.session_state.user_connecte = None
         st.session_state.messages_chat = []
         st.rerun()
+
+# ==============================================================================
+# --- 4.5 EXTENSION : SYSTÈME DE MÉMOIRE LONG TERME (STYLE CHATGPT) ---
+# ==============================================================================
+MEMOIRE_FILE = "memoire.json"
+
+def charger_memoire():
+    if not os.path.exists(MEMOIRE_FILE):
+        with open(MEMOIRE_FILE, "w", encoding="utf-8") as f:
+            json.dump({}, f, indent=4)
+        return {}
+    try:
+        with open(MEMOIRE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def sauvegarder_memoire(data):
+    with open(MEMOIRE_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
+
+# Exécution de la logique de mémoire si l'utilisateur est connecté
+if st.session_state.statut_connexion == "Connecté":
+    user_actuel = st.session_state.user_connecte
+    memoire_globale = charger_memoire()
+    
+    # Initialiser la mémoire de l'utilisateur si elle n'existe pas
+    if user_actuel not in memoire_globale:
+        memoire_globale[user_actuel] = []
+        sauvegarder_memoire(memoire_globale)
+        
+    st.markdown("<br><hr>", unsafe_allow_html=True)
+    st.markdown("### 🧠 Mémoire à long terme de Nairu")
+    
+    # Interface de contrôle de la mémoire (style ChatGPT)
+    col_mem_info, col_mem_action = st.columns([2, 1])
+    
+    with col_mem_info:
+        st.write("Voici ce que Nairu a gardé en mémoire à votre sujet pour personnaliser vos futures discussions :")
+        if not memoire_globale[user_actuel]:
+            st.info("💡 Nairu n'a encore rien enregistré. Écrivez un souvenir ci-contre pour commencer !")
+        else:
+            for i, souvenir in enumerate(memoire_globale[user_actuel]):
+                col_txt, col_del = st.columns([5, 1])
+                with col_txt:
+                    st.markdown(f"• {souvenir}")
+                with col_del:
+                    if st.button("🗑️", key=f"del_mem_{user_actuel}_{i}"):
+                        memoire_globale[user_actuel].pop(i)
+                        sauvegarder_memoire(memoire_globale)
+                        st.success("Souvenir oublié !")
+                        st.rerun()
+                        
+    with col_mem_action:
+        with st.form(key=f"form_ajout_memoire_{user_actuel}", clear_on_submit=True):
+            nouveau_souvenir = st.text_input("Ajouter un fait à retenir :", placeholder="Ex: Je m'appelle Falkon / J'aime Fortnite")
+            bouton_mem = st.form_submit_button("Enregistrer le souvenir", use_container_width=True)
+            
+            if bouton_mem and nouveau_souvenir.strip() != "":
+                memoire_globale[user_actuel].append(nouveau_souvenir.strip())
+                sauvegarder_memoire(memoire_globale)
+                st.success("Souvenir enregistré !")
+                st.rerun()
+
+    # --- INJECTION AUTOMATIQUE DE LA MÉMOIRE DANS GROQ ---
+    # On récupère la liste des souvenirs pour l'intégrer au prompt système de manière invisible
+    souvenirs_utilisateur = memoire_globale.get(user_actuel, [])
+    contexte_memoire_systeme = ""
+    if souvenirs_utilisateur:
+        contexte_memoire_systeme = "\n- Faits importants à retenir absolument sur cet utilisateur (sa mémoire) :\n" + "\n".join([f"  * {s}" for s in souvenirs_utilisateur])
+    
+    # Note pour faire le lien avec ton code :
+    # Pour que Groq lise ces souvenirs, il te suffira d'ajouter `{contexte_memoire_systeme}` 
+    # à l'intérieur de ta variable `system_instruction` dans la section 4 de ton code actuel.
+# ==============================================================================
