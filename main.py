@@ -94,15 +94,28 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    [data-testid="stIconMaterial"] { font-size: 0px !important; color: transparent !important; display: none !important; }
-    [data-testid="stExpander"] summary { position: relative !important; }
-    [data-testid="stExpander"] summary::after { content: '➔' !important; font-size: 14px !important; color: #00f0ff !important; position: absolute !important; right: 15px !important; }
+    /* 🔥 CORRECTION : On cache l'icône UNIQUEMENT dans l'expander pour libérer la Sidebar */
+    [data-testid="stExpander"] [data-testid="stIconMaterial"] { 
+        font-size: 0px !important; 
+        color: transparent !important; 
+        display: none !important; 
+    }
+    [data-testid="stExpander"] summary { 
+        position: relative !important; 
+    }
+    [data-testid="stExpander"] summary::after { 
+        content: '➔' !important; 
+        font-size: 14px !important; 
+        color: #00f0ff !important; 
+        position: absolute !important; 
+        right: 15px !important; 
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# 🕒 ON CHARGE LES DONNÉES EN PREMIER POUR CRÉER LA VARIABLE SÉCURISÉE
+# Chargement de l'état de la maintenance depuis la bdd
 data_maintenance = charger_utilisateurs()
 
 if "mode_maintenance" not in st.session_state:
