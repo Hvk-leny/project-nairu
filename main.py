@@ -254,12 +254,18 @@ else:
                     system_instruction = f"Tu es Nairu, une IA de recherche créée par Leny et Eliott. Utilise ces infos web si besoin : {contexte_web}"
                     
                     historique_complet = [{"role": "system", "content": system_instruction}] + st.session_state.messages_chat
-                    reponse_brute = client_groq.chat.completions.create(model="llama3-8b-8192", messages=historique_complet)
+                    
+                    # Changement du modèle pour utiliser la version mise à jour de Groq
+                    reponse_brute = client_groq.chat.completions.create(
+                        model="llama-3.3-70b-versatile", 
+                        messages=historique_complet
+                    )
                     texte_reponse = reponse_brute.choices[0].message.content
                     st.write(texte_reponse)
             st.session_state.messages_chat.append({"role": "assistant", "content": texte_reponse})
-        except:
-            st.error("❌ Erreur de clé API Groq.")
+        except Exception as e:
+            # Affiche la cause exacte du problème à l'écran pour debug plus facilement
+            st.error(f"❌ Erreur Groq : {str(e)}")
 
     st.markdown("<br><hr>", unsafe_allow_html=True)
     if st.button("🔴 Déconnexion", use_container_width=True):
@@ -267,4 +273,3 @@ else:
         st.session_state.user_connecte = None
         st.session_state.messages_chat = []
         st.rerun()
-        
