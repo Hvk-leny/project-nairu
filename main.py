@@ -175,7 +175,7 @@ if st.session_state.statut_connexion == "Déconnecté":
                 st.link_button("📸 Instagram d'Eliott", "https://instagram.com/eliott31tls", use_container_width=True)
             with col_leny:
                 st.markdown("**⚡ Leny**")
-                st.link_button("📸 Instagram de Leny", "https://instagram.com/ton_pseudo_instagram", use_container_width=True)
+                st.link_button("📸 Instagram de Leny", "https://www.instagram.com/hvk.leny/", use_container_width=True)
                 st.link_button("📺 YouTube de Leny", "https://www.youtube.com/@Hvk_Falkon", use_container_width=True)
 
 # ==============================================================================
