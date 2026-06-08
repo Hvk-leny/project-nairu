@@ -113,11 +113,48 @@ if "messages_chat" not in st.session_state:
 # ==============================================================================
 # --- 3. INTERFACE DE CONNEXION / INSCRIPTION ---
 # ==============================================================================
-if st.session_state.statut_connexion == "Déconnecté":
+# Si le site est en maintenance, que personne n'est connecté, et qu'on ne force pas l'accès admin
+if st.session_state.mode_maintenance and st.session_state.statut_connexion == "Déconnecté" and not st.session_state.forcer_formulaire_admin:
+    col_gauche, col_centre, col_droite = st.columns([1, 2, 1])
+    with col_centre:
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.error("### 🛠️ Site temporairement indisponible")
+        st.info("Nairu AI est actuellement en cours de maintenance ou de mise à jour.")
+        
+        # Calcul et affichage du timer restant
+        if data_maintenance.get("maintenance_fin"):
+            try:
+                fin = datetime.datetime.fromisoformat(data_maintenance["maintenance_fin"])
+                restant = fin - datetime.datetime.now()
+                minutes_restantes = max(0, int(restant.total_seconds() // 60))
+                if minutes_restantes > 0:
+                    st.warning(f"⏳ **Remise en place prévue dans environ :** {minutes_restantes} minute(s).")
+                else:
+                    st.warning(f"⏳ **Remise en place imminente...**")
+            except:
+                pass
+        
+        st.write("Si vous avez besoin d'un accès ou pour toute question, merci de contacter **Eliott** :")
+        st.link_button("📸 Contacter Eliott sur Instagram", "https://instagram.com/eliott31tls", use_container_width=True)
+        
+        st.markdown("<br><br><hr>", unsafe_allow_html=True)
+        # Bouton secret pour ouvrir le formulaire de connexion
+        if st.button("🔒 Connexion Administrateur", use_container_width=False):
+            st.session_state.forcer_formulaire_admin = True
+            st.rerun()
+            
+    st.stop() # On bloque l'affichage de l'accueil pour les autres
+
+# Interface classique (visible si pas de maintenance, ou si l'admin force l'entrée)
+elif st.session_state.statut_connexion == "Déconnecté":
+    st.title("bienvenue sur nairu")
     col_gauche, col_centre, col_droite = st.columns([1, 2, 1])
     
     with col_centre:
         with st.container(border=True):
+            if st.session_state.forcer_formulaire_admin:
+                st.warning("⚠️ Mode Maintenance Actif - Accès réservé à l'Administrateur")
+            
             tab_login, tab_register = st.tabs(["🔒 Connexion", "✨ Créer un compte"])
             
             with tab_login:
@@ -134,38 +171,52 @@ if st.session_state.statut_connexion == "Déconnecté":
                         if est_ip_bannie(user_ip):
                             st.error("❌ Accès refusé. Votre connexion internet a été bannie de ce site.")
                         elif identifiant in data_totale["comptes"] and data_totale["comptes"][identifiant]["password"] == code_secret:
-                            st.session_state.statut_connexion = "Connecté"
-                            st.session_state.user_connecte = identifiant
-                            st.success(f"Bienvenue {identifiant} !")
-                            st.rerun()
+                            
+                            # SÉCURITÉ : Si maintenance active, seul admin1 passe
+                            if st.session_state.mode_maintenance and identifiant != "admin1":
+                                st.error("🛑 Ce site est en maintenance. Seul le compte admin1 peut se connecter.")
+                            else:
+                                st.session_state.statut_connexion = "Connecté"
+                                st.session_state.user_connecte = identifiant
+                                st.session_state.forcer_formulaire_admin = False
+                                st.success(f"Bienvenue {identifiant} !")
+                                st.rerun()
                         else:
                             st.error("Identifiant ou mot de passe incorrect.")
-            
+                            
             with tab_register:
                 st.markdown("### Créer un compte")
-                st.markdown("> *Système anti-spam : Une seule création de compte par IP.*")
-                with st.form(key="form_inscription"):
-                    nouvel_identifiant = st.text_input("Choisis un identifiant :", key="reg_username")
-                    nouvel_email = st.text_input("Adresse Email :", placeholder="votre@email.com", key="reg_email")
-                    nouveau_code = st.text_input("Choisis un code secret :", type="password", key="reg_password")
-                    bouton_inscription = st.form_submit_button("Créer mon compte", use_container_width=True)
-                    
-                    if bouton_inscription:
-                        data_totale = charger_utilisateurs()
-                        with st.spinner("Vérification..."):
-                            user_ip = recuperer_ip_visiteur()
+                if st.session_state.mode_maintenance:
+                    st.error("❌ Les inscriptions sont fermées pendant la maintenance du site.")
+                else:
+                    st.markdown("> *Système anti-spam : Une seule création de compte par IP.*")
+                    with st.form(key="form_inscription"):
+                        nouvel_identifiant = st.text_input("Choisis un identifiant :", key="reg_username")
+                        nouvel_email = st.text_input("Adresse Email :", placeholder="votre@email.com", key="reg_email")
+                        nouveau_code = st.text_input("Choisis un code secret :", type="password", key="reg_password")
+                        bouton_inscription = st.form_submit_button("Créer mon compte", use_container_width=True)
                         
-                        if est_ip_bannie(user_ip):
-                            st.error("❌ Connexion bannie.")
-                        elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "":
-                            st.warning("Veuillez remplir les champs.")
-                        elif nouvel_identifiant.lower() in data_totale["comptes"]:
-                            st.error("Cet identifiant existe déjà !")
-                        elif ip_deja_utilisee(user_ip):
-                            st.error("❌ Un compte a déjà été créé avec votre connexion internet.")
-                        else:
-                            sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code, user_ip)
-                            st.success("🎉 Compte créé ! Vous pouvez vous connecter.")
+                        if bouton_inscription:
+                            data_totale = charger_utilisateurs()
+                            with st.spinner("Vérification..."):
+                                user_ip = recuperer_ip_visiteur()
+                            
+                            if est_ip_bannie(user_ip):
+                                st.error("❌ Connexion bannie.")
+                            elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "":
+                                st.warning("Veuillez remplir les champs.")
+                            elif nouvel_identifiant.lower().strip() in data_totale["comptes"]:
+                                relative_error = st.error("Cet identifiant existe déjà !")
+                            elif ip_deja_utilisee(user_ip):
+                                st.error("❌ Un compte a déjà été créé avec votre connexion internet.")
+                            else:
+                                sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code, user_ip)
+                                st.success("🎉 Compte créé ! Vous pouvez vous connecter.")
+
+        if st.session_state.forcer_formulaire_admin:
+            if st.button("⬅️ Retour à la page de maintenance"):
+                st.session_state.forcer_formulaire_admin = False
+                st.rerun()
 
         st.markdown("<br>", unsafe_allow_html=True)
         with st.expander("ℹ️ En savoir plus sur Nairu (Informations)"):
@@ -185,15 +236,45 @@ if st.session_state.statut_connexion == "Déconnecté":
 # --- 4. INTERFACE UNE FOIS CONNECTÉ ---
 # ==============================================================================
 else:
-    if st.session_state.user_connecte in ["admin1", "leny", "eliott"]:
+    user_actuel = str(st.session_state.user_connecte).lower().strip()
+    
+    # 🔴 SEUL LE COMPTE ADMIN1 A ACCÈS AU PANNEAU DE CONTRÔLE SÉCURITÉ & MAINTENANCE
+    if user_actuel == "admin1":
         with st.sidebar:
             st.markdown("### 🛠️ Mode Administrateur")
             st.info(f"Connecté en tant que : {st.session_state.user_connecte}")
             
-            data_totale = charger_utilisateurs()
-            st.metric("👥 Total Utilisateurs", len(data_totale.get("comptes", {})))
+            # --- ⚙️ GESTION DE LA MAINTENANCE ---
+            st.markdown("---")
+            st.markdown("#### ⚙️ Gestion de la Maintenance")
+            
+            # Case à cocher pour activer/désactiver instantanément
+            etat_maintenance = st.checkbox("Activer le mode maintenance", value=st.session_state.mode_maintenance)
+            
+            if etat_maintenance != st.session_state.mode_maintenance:
+                data_totale = charger_utilisateurs()
+                data_totale["maintenance"] = etat_maintenance
+                if not etat_maintenance:
+                    data_totale["maintenance_fin"] = "" # Reset du temps si on décoche
+                sauvegarder_donnees(data_totale)
+                st.session_state.mode_maintenance = etat_maintenance
+                st.rerun()
+                
+            # Configuration du Timer si la maintenance est active
+            if st.session_state.mode_maintenance:
+                st.warning("⚠️ Le site est invisible pour les utilisateurs.")
+                temps_minutes = st.number_input("Durée de la maintenance (en minutes) :", min_value=1, max_value=1440, value=30)
+                if st.button("⏱️ Lancer / Mettre à jour le Timer", use_container_width=True):
+                    data_totale = charger_utilisateurs()
+                    heure_fin = datetime.datetime.now() + datetime.timedelta(minutes=temps_minutes)
+                    data_totale["maintenance_fin"] = heure_fin.isoformat()
+                    sauvegarder_donnees(data_totale)
+                    st.success(f"Timer activé jusqu'à {heure_fin.strftime('%H:%M:%S')} !")
+                    st.rerun()
+            st.markdown("---")
             
             if st.checkbox("Voir la gestion des comptes"):
+                data_totale = charger_utilisateurs()
                 st.markdown("#### 👥 Modération des comptes")
                 
                 for nom, infos in list(data_totale["comptes"].items()):
@@ -238,32 +319,12 @@ else:
 
     # 🟢 CHAT IA POUR TOUT LE MONDE
     st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
-    
-    # Options de style et d'exportation de discussion
-    col_style, col_export = st.columns([3, 1])
-    with col_style:
-        style_reponse = st.radio("Style de réponse souhaité :", ["✨ Créatif & Détaillé", "😐 Neutre & Direct", "🎯 Ultra-Précis"], index=0, horizontal=True)
-    with col_export:
-        if st.session_state.messages_chat:
-            historique_texte = "\n".join([f"{m['role'].upper()}: {m['content']}" for m in st.session_state.messages_chat])
-            st.download_button("📥 Exporter le chat", historique_texte, file_name="discussion_nairu.txt", use_container_width=True)
-
-    st.markdown("---")
+    if st.session_state.mode_maintenance:
+        st.sidebar.warning("⚠️ ATTENTION : Mode maintenance actif.")
 
     for msg in st.session_state.messages_chat:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
-            
-    # 📁 Zone de dépôt de document texte (.txt)
-    document_importe = st.file_uploader("📁 Ajouter un document texte (.txt) pour Nairu :", type=["txt"])
-    texte_du_document = ""
-    
-    if document_importe is not None:
-        try:
-            texte_du_document = document_importe.read().decode("utf-8")
-            st.sidebar.success(f"📄 Mémoire active : {document_importe.name}")
-        except Exception as e:
-            st.error(f"Impossible de lire le fichier : {str(e)}")
     
     prompt_utilisateur = st.chat_input("Posez votre question à Nairu...")
     
@@ -273,32 +334,27 @@ else:
         st.session_state.messages_chat.append({"role": "user", "content": prompt_utilisateur})
         
         try:
-            client_groq = Groq(api_key="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")
+            client_groq = Groq(api_key=st.secrets["GROQ_API_KEY"])
+            
             with st.chat_message("assistant"):
                 with st.spinner("Nairu fouille le web en direct et réfléchit..."):
                     
                     contexte_web = executer_recherche_web(prompt_utilisateur)
                     nom_utilisateur = st.session_state.user_connecte.capitalize()
                     
-                    contexte_document_systeme = ""
-                    if texte_du_document != "":
-                        contexte_document_systeme = f"\n- L'utilisateur a importé un document texte. Voici son contenu : \n{texte_du_document}\n Si la question de l'utilisateur porte sur ce document, utilise ces données cachées pour lui répondre sans avoir à lui réafficher le texte complet."
-                    
                     system_instruction = (
                         "Tu es Nairu, un assistant de recherche IA ultra-performant et connecté au web en temps réel, développé par Leny et Eliott.\n"
                         f"Tu es actuellement en train de discuter avec l'utilisateur connecté qui s'appelle : {nom_utilisateur}.\n"
-                        f"Sache et retiens bien qu'il s'appelle {nom_utilisateur}. Tu devez être capable de t'en souvenir s'il te demande 'comment je m'appelle ?' ou 'qui suis-je ?'.\n"
-                        f"L'utilisateur a demandé un style de réponse : {style_reponse}.\n"
-                        "Si l'utilisateur est Leny ou Eliott, agis avec eux de manière encore plus complice puisqu'ils sont tes créateurs.\n"
-                        f"{contexte_document_systeme}\n\n"
-                        "Pour répondre aux questions générales, sers-toi obligatoirement des résultats de recherche internet suivants :\n"
+                        f"Sache et retiens bien qu'il s'appelle {nom_utilisateur}. Tu dois t'en souvenir s'il te demande 'comment je m'appelle ?'.\n"
+                        "Si l'utilisateur est Leny ou Eliott, agis avec eux de manière encore plus complice puisqu'ils sont tes créateurs.\n\n"
+                        "Pour répondre à la question actuelle, sers-toi des résultats de recherche internet suivants :\n"
                         f"{contexte_web}\n\n"
                         "Règles importantes :\n"
-                        "- Synthétise les informations trouvées de manière claire et intelligente.\n"
+                        "- Synthétise les informations trouvées de manière claire, concise et intelligente.\n"
                         "- Reste amical, moderne, naturel et efficace."
                     )
                     
-                    historique_complet = [{"role": "system", "content": system_instruction}] + [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages_chat]
+                    historique_complet = [{"role": "system", "content": system_instruction}] + st.session_state.messages_chat
                     
                     reponse_brute = client_groq.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
@@ -306,27 +362,16 @@ else:
                     )
                     texte_reponse = reponse_brute.choices[0].message.content
                     st.write(texte_reponse)
-                    
+            
             st.session_state.messages_chat.append({"role": "assistant", "content": texte_reponse})
             st.rerun()
+            
         except Exception as e:
             st.error(f"❌ Erreur Groq : {str(e)}")
 
     st.markdown("<br><hr>", unsafe_allow_html=True)
-    
-    col_logout, col_clear = st.columns(2)
-    with col_logout:
-        if st.button("🔴 Déconnexion", use_container_width=True):
-            st.session_state.statut_connexion = "Déconnecté"
-            st.session_state.user_connecte = None
-            st.session_state.messages_chat = []
-            st.rerun()
-    with col_clear:
-        if st.button("🗑️ Effacer le chat actuel", use_container_width=True):
-            st.session_state.messages_chat = []
-            st.rerun()
-
-# ==============================================================================
-# --- 5. PIED DE PAGE GLOBAL (VISIBLE TOUT LE TEMPS) ---
-# ==============================================================================
-st.markdown("<p style='text-align: center; color: gray; font-size: 14px; margin-top: 50px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
+    if st.button("🔴 Déconnexion", use_container_width=True):
+        st.session_state.statut_connexion = "Déconnecté"
+        st.session_state.user_connecte = None
+        st.session_state.messages_chat = []
+        st.rerun()
