@@ -247,8 +247,8 @@ else:
         st.session_state.messages_chat.append({"role": "user", "content": prompt_utilisateur})
         
         try:
-            client_groq = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            with st.chat_message("assistant"):
+client_groq = Groq(api_key="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")
+with st.chat_message("assistant"):
                 with st.spinner("Nairu fouille le web et réfléchit..."):
                     contexte_web = executer_recherche_web(prompt_utilisateur)
                     system_instruction = f"Tu es Nairu, une IA de recherche créée par Leny et Eliott. Utilise ces infos web si besoin : {contexte_web}"
