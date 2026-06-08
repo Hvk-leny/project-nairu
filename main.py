@@ -1,3 +1,4 @@
+```python
 import streamlit as st
 import json
 import os
@@ -49,7 +50,7 @@ def sauvegarder_donnees(data):
 
 def sauvegarder_utilisateur(username, email, password, ip_address):
     data = charger_utilisateurs()
-    data["comptes"][username.lower()] = {
+    data["comptes"][username.lower().strip()] = {
         "email": email,
         "password": password,
         "ip": ip_address
@@ -159,7 +160,7 @@ if st.session_state.statut_connexion == "Déconnecté":
                             st.error("❌ Connexion bannie.")
                         elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "":
                             st.warning("Veuillez remplir les champs.")
-                        elif nouvel_identifiant.lower() in data_totale["comptes"]:
+                        elif nouvel_identifiant.lower().strip() in data_totale["comptes"]:
                             st.error("Cet identifiant existe déjà !")
                         elif ip_deja_utilisee(user_ip):
                             st.error("❌ Un compte a déjà été créé avec votre connexion internet.")
@@ -185,7 +186,8 @@ if st.session_state.statut_connexion == "Déconnecté":
 # --- 4. INTERFACE UNE FOIS CONNECTÉ ---
 # ==============================================================================
 else:
-    if st.session_state.user_connecte in ["admin1", "leny", "eliott"]:
+    # 🔴 PANNEAU DE CONTRÔLE ADMIN POUR LENY & ELIOTT (SÉCURISÉ CONTRE LA CASSE)
+    if str(st.session_state.user_connecte).lower() in ["admin1", "leny", "eliott"]:
         with st.sidebar:
             st.markdown("### 🛠️ Mode Administrateur")
             st.info(f"Connecté en tant que : {st.session_state.user_connecte}")
@@ -237,6 +239,7 @@ else:
     # 🟢 CHAT IA POUR TOUT LE MONDE
     st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
     
+    # Affichage propre de l'historique
     for msg in st.session_state.messages_chat:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
@@ -249,27 +252,29 @@ else:
         st.session_state.messages_chat.append({"role": "user", "content": prompt_utilisateur})
         
         try:
-            client_groq = Groq(api_key="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")
+            # 🔐 SÉCURISATION : Utilisation des Secrets Streamlit Cloud pour la clé API
+            client_groq = Groq(api_key=st.secrets["GROQ_API_KEY"])
+            
             with st.chat_message("assistant"):
                 with st.spinner("Nairu fouille le web en direct et réfléchit..."):
                     
                     contexte_web = executer_recherche_web(prompt_utilisateur)
-                    
-                    # 🛠️ AJOUT DE LA VARIABLE NOM DANS LES INSTRUCTIONS DE L'IA
                     nom_utilisateur = st.session_state.user_connecte.capitalize()
                     
+                    # Consigne système fixe et optimisée
                     system_instruction = (
                         "Tu es Nairu, un assistant de recherche IA ultra-performant et connecté au web en temps réel, développé par Leny et Eliott.\n"
                         f"Tu es actuellement en train de discuter avec l'utilisateur connecté qui s'appelle : {nom_utilisateur}.\n"
-                        f"Sache et retiens bien qu'il s'appelle {nom_utilisateur}. Tu dois être capable de t'en souvenir s'il te demande 'comment je m'appelle ?' ou 'qui suis-je ?'.\n"
+                        f"Sache et retiens bien qu'il s'appelle {nom_utilisateur}. Tu dois t'en souvenir s'il te demande 'comment je m'appelle ?'.\n"
                         "Si l'utilisateur est Leny ou Eliott, agis avec eux de manière encore plus complice puisqu'ils sont tes créateurs.\n\n"
-                        "Pour répondre aux questions générales, sers-toi obligatoirement des résultats de recherche internet suivants :\n"
+                        "Pour répondre à la question actuelle, sers-toi des résultats de recherche internet suivants :\n"
                         f"{contexte_web}\n\n"
                         "Règles importantes :\n"
-                        "- Synthétise les informations trouvées de manière claire et intelligente.\n"
+                        "- Synthétise les informations trouvées de manière claire, concise et intelligente.\n"
                         "- Reste amical, moderne, naturel et efficace."
                     )
                     
+                    # On construit l'historique en injectant le bloc système au tout début une seule fois
                     historique_complet = [{"role": "system", "content": system_instruction}] + st.session_state.messages_chat
                     
                     reponse_brute = client_groq.chat.completions.create(
@@ -278,7 +283,10 @@ else:
                     )
                     texte_reponse = reponse_brute.choices[0].message.content
                     st.write(texte_reponse)
+            
             st.session_state.messages_chat.append({"role": "assistant", "content": texte_reponse})
+            st.rerun() # Force le rechargement propre de l'historique à l'écran
+            
         except Exception as e:
             st.error(f"❌ Erreur Groq : {str(e)}")
 
