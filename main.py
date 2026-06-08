@@ -185,8 +185,11 @@ if st.session_state.statut_connexion == "Déconnecté":
 # --- 4. INTERFACE UNE FOIS CONNECTÉ ---
 # ==============================================================================
 else:
-    # 🔴 PANNEAU DE CONTRÔLE ADMIN POUR LENY & ELIOTT (SÉCURISÉ CONTRE LA CASSE)
-    if str(st.session_state.user_connecte).lower() in ["admin1", "leny", "eliott"]:
+    # Nettoyage et vérification de la casse pour la session
+    user_actuel = str(st.session_state.user_connecte).lower().strip()
+    
+    # 🔴 SEUL LE COMPTE ADMIN1 A ACCÈS AU PANNEAU DE CONTRÔLE SÉCURITÉ
+    if user_actuel == "admin1":
         with st.sidebar:
             st.markdown("### 🛠️ Mode Administrateur")
             st.info(f"Connecté en tant que : {st.session_state.user_connecte}")
@@ -197,106 +200,4 @@ else:
                 
                 for nom, infos in list(data_totale["comptes"].items()):
                     if nom not in ["admin1", "leny", "eliott", "exemple"]:
-                        st.markdown(f"**Identifiant :** `{nom}`")
-                        st.caption(f"IP : {infos.get('ip', '0.0.0.0')} | Email : {infos.get('email', 'N/A')}")
-                        
-                        col_btn_ban, col_btn_del = st.columns(2)
-                        
-                        with col_btn_ban:
-                            if st.button(f"🚫 Bannir", key=f"ban_{nom}", use_container_width=True):
-                                user_ip_to_ban = infos.get('ip')
-                                if user_ip_to_ban and user_ip_to_ban not in data_totale["banned_ips"]:
-                                    data_totale["banned_ips"].append(user_ip_to_ban)
-                                del data_totale["comptes"][nom]
-                                sauvegarder_donnees(data_totale)
-                                st.success(f"Banni !")
-                                st.rerun()
-                                
-                        with col_btn_del:
-                            if st.button(f"🗑️ Supprimer", key=f"del_{nom}", use_container_width=True):
-                                del data_totale["comptes"][nom]
-                                sauvegarder_donnees(data_totale)
-                                st.success(f"Supprimé !")
-                                st.rerun()
-                        st.markdown("---")
-                
-                st.markdown("#### 🛑 IP Bloquées")
-                if not data_totale.get("banned_ips"):
-                    st.write("*Aucune IP bloquée.*")
-                else:
-                    for ip in data_totale["banned_ips"]:
-                        col_ip_text, col_ip_unban = st.columns([2, 1])
-                        with col_ip_text:
-                            st.code(ip)
-                        with col_ip_unban:
-                            if st.button("🔓", key=f"unban_{ip}", use_container_width=True):
-                                data_totale["banned_ips"].remove(ip)
-                                sauvegarder_donnees(data_totale)
-                                st.success("Débloquée")
-                                st.rerun()
-
-    # 🟢 CHAT IA POUR TOUT LE MONDE
-    st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
-    
-    # Affichage propre de l'historique
-    for msg in st.session_state.messages_chat:
-        with st.chat_message(msg["role"]):
-            st.write(msg["content"])
-    
-    prompt_utilisateur = st.chat_input("Posez votre question à Nairu...")
-    
-    if prompt_utilisateur:
-        with st.chat_message("user"):
-            st.write(prompt_utilisateur)
-        st.session_state.messages_chat.append({"role": "user", "content": prompt_utilisateur})
-        
-        try:
-            # 🔐 SÉCURISATION : Utilisation des Secrets Streamlit Cloud pour la clé API
-            client_groq = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            
-            with st.chat_message("assistant"):
-                with st.spinner("Nairu fouille le web en direct et réfléchit..."):
-                    
-                    contexte_web = executer_recherche_web(prompt_utilisateur)
-                    nom_utilisateur = st.session_state.user_connecte.capitalize()
-                    
-                    # Consigne système fixe et optimisée
-                    system_instruction = (
-                        "Tu es Nairu, un assistant de recherche IA ultra-performant et connecté au web en temps réel, développé par Leny et Eliott.\n"
-                        f"Tu es actuellement en train de discuter avec l'utilisateur connecté qui s'appelle : {nom_utilisateur}.\n"
-                        f"Sache et retiens bien qu'il s'appelle {nom_utilisateur}. Tu dois t'en souvenir s'il te demande 'comment je m'appelle ?'.\n"
-                        "Si l'utilisateur est Leny ou Eliott, agis avec eux de manière encore plus complice puisqu'ils sont tes créateurs.\n\n"
-                        "Pour répondre à la question actuelle, sers-toi des résultats de recherche internet suivants :\n"
-                        f"{contexte_web}\n\n"
-                        "Règles importantes :\n"
-                        "- Synthétise les informations trouvées de manière claire, concise et intelligente.\n"
-                        "- Reste amical, moderne, naturel et efficace."
-                    )
-                    
-                    # On construit l'historique en injectant le bloc système au tout début une seule fois
-                    historique_complet = [{"role": "system", "content": system_instruction}] + st.session_state.messages_chat
-                    
-                    reponse_brute = client_groq.chat.completions.create(
-                        model="llama-3.3-70b-versatile", 
-                        messages=historique_complet
-                    )
-                    texte_reponse = reponse_brute.choices[0].message.content
-                    st.write(texte_reponse)
-            
-            st.session_state.messages_chat.append({"role": "assistant", "content": texte_reponse})
-            st.rerun() # Force le rechargement propre de l'historique à l'écran
-            
-        except Exception as e:
-            st.error(f"❌ Erreur Groq : {str(e)}")
-
-    st.markdown("<br><hr>", unsafe_allow_html=True)
-    if st.button("🔴 Déconnexion", use_container_width=True):
-        st.session_state.statut_connexion = "Déconnecté"
-        st.session_state.user_connecte = None
-        st.session_state.messages_chat = []
-        st.rerun()
-
-# ==============================================================================
-# --- 5. PIED DE PAGE GLOBAL (VISIBLE TOUT LE TEMPS) ---
-# ==============================================================================
-st.markdown("<p style='text-align: center; color: gray; font-size: 14px; margin-top: 50px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
+                        st.markdown(f"**Identifiant
