@@ -49,7 +49,7 @@ def sauvegarder_donnees(data):
 
 def sauvegarder_utilisateur(username, email, password, ip_address):
     data = charger_utilisateurs()
-    data["comptes"][username.lower().strip()] = {
+    data["comptes"][username.lower()] = {
         "email": email,
         "password": password,
         "ip": ip_address
@@ -159,7 +159,7 @@ if st.session_state.statut_connexion == "Déconnecté":
                             st.error("❌ Connexion bannie.")
                         elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "":
                             st.warning("Veuillez remplir les champs.")
-                        elif nouvel_identifiant.lower().strip() in data_totale["comptes"]:
+                        elif nouvel_identifiant.lower() in data_totale["comptes"]:
                             st.error("Cet identifiant existe déjà !")
                         elif ip_deja_utilisee(user_ip):
                             st.error("❌ Un compte a déjà été créé avec votre connexion internet.")
@@ -185,19 +185,148 @@ if st.session_state.statut_connexion == "Déconnecté":
 # --- 4. INTERFACE UNE FOIS CONNECTÉ ---
 # ==============================================================================
 else:
-    # Nettoyage et vérification de la casse pour la session
-    user_actuel = str(st.session_state.user_connecte).lower().strip()
-    
-    # 🔴 SEUL LE COMPTE ADMIN1 A ACCÈS AU PANNEAU DE CONTRÔLE SÉCURITÉ
-    if user_actuel == "admin1":
+    if st.session_state.user_connecte in ["admin1", "leny", "eliott"]:
         with st.sidebar:
             st.markdown("### 🛠️ Mode Administrateur")
             st.info(f"Connecté en tant que : {st.session_state.user_connecte}")
             
+            data_totale = charger_utilisateurs()
+            st.metric("👥 Total Utilisateurs", len(data_totale.get("comptes", {})))
+            
             if st.checkbox("Voir la gestion des comptes"):
-                data_totale = charger_utilisateurs()
                 st.markdown("#### 👥 Modération des comptes")
                 
                 for nom, infos in list(data_totale["comptes"].items()):
                     if nom not in ["admin1", "leny", "eliott", "exemple"]:
-                        st.markdown(f"**Identifiant
+                        st.markdown(f"**Identifiant :** `{nom}`")
+                        st.caption(f"IP : {infos.get('ip', '0.0.0.0')} | Email : {infos.get('email', 'N/A')}")
+                        
+                        col_btn_ban, col_btn_del = st.columns(2)
+                        
+                        with col_btn_ban:
+                            if st.button(f"🚫 Bannir", key=f"ban_{nom}", use_container_width=True):
+                                user_ip_to_ban = infos.get('ip')
+                                if user_ip_to_ban and user_ip_to_ban not in data_totale["banned_ips"]:
+                                    data_totale["banned_ips"].append(user_ip_to_ban)
+                                del data_totale["comptes"][nom]
+                                sauvegarder_donnees(data_totale)
+                                st.success(f"Banni !")
+                                st.rerun()
+                                
+                        with col_btn_del:
+                            if st.button(f"🗑️ Supprimer", key=f"del_{nom}", use_container_width=True):
+                                del data_totale["comptes"][nom]
+                                sauvegarder_donnees(data_totale)
+                                st.success(f"Supprimé !")
+                                st.rerun()
+                        st.markdown("---")
+                
+                st.markdown("#### 🛑 IP Bloquées")
+                if not data_totale.get("banned_ips"):
+                    st.write("*Aucune IP bloquée.*")
+                else:
+                    for ip in data_totale["banned_ips"]:
+                        col_ip_text, col_ip_unban = st.columns([2, 1])
+                        with col_ip_text:
+                            st.code(ip)
+                        with col_ip_unban:
+                            if st.button("🔓", key=f"unban_{ip}", use_container_width=True):
+                                data_totale["banned_ips"].remove(ip)
+                                sauvegarder_donnees(data_totale)
+                                st.success("Débloquée")
+                                st.rerun()
+
+    # 🟢 CHAT IA POUR TOUT LE MONDE
+    st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
+    
+    # Options de style et d'exportation de discussion
+    col_style, col_export = st.columns([3, 1])
+    with col_style:
+        style_reponse = st.radio("Style de réponse souhaité :", ["✨ Créatif & Détaillé", "😐 Neutre & Direct", "🎯 Ultra-Précis"], index=0, horizontal=True)
+    with col_export:
+        if st.session_state.messages_chat:
+            historique_texte = "\n".join([f"{m['role'].upper()}: {m['content']}" for m in st.session_state.messages_chat])
+            st.download_button("📥 Exporter le chat", historique_texte, file_name="discussion_nairu.txt", use_container_width=True)
+
+    st.markdown("---")
+
+    for msg in st.session_state.messages_chat:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
+            
+    # 📁 Zone de dépôt de document texte (.txt)
+    document_importe = st.file_uploader("📁 Ajouter un document texte (.txt) pour Nairu :", type=["txt"])
+    texte_du_document = ""
+    
+    if document_importe is not None:
+        try:
+            texte_du_document = document_importe.read().decode("utf-8")
+            st.sidebar.success(f"📄 Mémoire active : {document_importe.name}")
+        except Exception as e:
+            st.error(f"Impossible de lire le fichier : {str(e)}")
+    
+    prompt_utilisateur = st.chat_input("Posez votre question à Nairu...")
+    
+    if prompt_utilisateur:
+        with st.chat_message("user"):
+            st.write(prompt_utilisateur)
+        st.session_state.messages_chat.append({"role": "user", "content": prompt_utilisateur})
+        
+        try:
+            client_groq = Groq(api_key="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")
+            with st.chat_message("assistant"):
+                with st.spinner("Nairu fouille le web en direct et réfléchit..."):
+                    
+                    contexte_web = executer_recherche_web(prompt_utilisateur)
+                    nom_utilisateur = st.session_state.user_connecte.capitalize()
+                    
+                    contexte_document_systeme = ""
+                    if texte_du_document != "":
+                        contexte_document_systeme = f"\n- L'utilisateur a importé un document texte. Voici son contenu : \n{texte_du_document}\n Si la question de l'utilisateur porte sur ce document, utilise ces données cachées pour lui répondre sans avoir à lui réafficher le texte complet."
+                    
+                    system_instruction = (
+                        "Tu es Nairu, un assistant de recherche IA ultra-performant et connecté au web en temps réel, développé par Leny et Eliott.\n"
+                        f"Tu es actuellement en train de discuter avec l'utilisateur connecté qui s'appelle : {nom_utilisateur}.\n"
+                        f"Sache et retiens bien qu'il s'appelle {nom_utilisateur}. Tu devez être capable de t'en souvenir s'il te demande 'comment je m'appelle ?' ou 'qui suis-je ?'.\n"
+                        f"L'utilisateur a demandé un style de réponse : {style_reponse}.\n"
+                        "Si l'utilisateur est Leny ou Eliott, agis avec eux de manière encore plus complice puisqu'ils sont tes créateurs.\n"
+                        f"{contexte_document_systeme}\n\n"
+                        "Pour répondre aux questions générales, sers-toi obligatoirement des résultats de recherche internet suivants :\n"
+                        f"{contexte_web}\n\n"
+                        "Règles importantes :\n"
+                        "- Synthétise les informations trouvées de manière claire et intelligente.\n"
+                        "- Reste amical, moderne, naturel et efficace."
+                    )
+                    
+                    historique_complet = [{"role": "system", "content": system_instruction}] + [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages_chat]
+                    
+                    reponse_brute = client_groq.chat.completions.create(
+                        model="llama-3.3-70b-versatile", 
+                        messages=historique_complet
+                    )
+                    texte_reponse = reponse_brute.choices[0].message.content
+                    st.write(texte_reponse)
+                    
+            st.session_state.messages_chat.append({"role": "assistant", "content": texte_reponse})
+            st.rerun()
+        except Exception as e:
+            st.error(f"❌ Erreur Groq : {str(e)}")
+
+    st.markdown("<br><hr>", unsafe_allow_html=True)
+    
+    col_logout, col_clear = st.columns(2)
+    with col_logout:
+        if st.button("🔴 Déconnexion", use_container_width=True):
+            st.session_state.statut_connexion = "Déconnecté"
+            st.session_state.user_connecte = None
+            st.session_state.messages_chat = []
+            st.rerun()
+    with col_clear:
+        if st.button("🗑️ Effacer le chat actuel", use_container_width=True):
+            st.session_state.messages_chat = []
+            st.rerun()
+
+# ==============================================================================
+# --- 5. PIED DE PAGE GLOBAL (VISIBLE TOUT LE TEMPS) ---
+# ==============================================================================
+st.markdown("<p style='text-align: center; color: gray; font-size: 14px; margin-top: 50px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
