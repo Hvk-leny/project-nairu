@@ -102,7 +102,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("bienvenue sur nairu")
+# 🕒 ON CHARGE LES DONNÉES EN PREMIER POUR CRÉER LA VARIABLE SÉCURISÉE
+data_maintenance = charger_utilisateurs()
+
+if "mode_maintenance" not in st.session_state:
+    st.session_state.mode_maintenance = data_maintenance.get("maintenance", False)
 
 if "statut_connexion" not in st.session_state:
     st.session_state.statut_connexion = "Déconnecté"
@@ -110,6 +114,21 @@ if "statut_connexion" not in st.session_state:
 if "messages_chat" not in st.session_state:
     st.session_state.messages_chat = []
 
+if "forcer_formulaire_admin" not in st.session_state:
+    st.session_state.forcer_formulaire_admin = False
+
+# Vérification automatique du Timer de maintenance
+if st.session_state.mode_maintenance and data_maintenance.get("maintenance_fin"):
+    try:
+        import datetime
+        fin_maintenance = datetime.datetime.fromisoformat(data_maintenance["maintenance_fin"])
+        if datetime.datetime.now() > fin_maintenance:
+            data_maintenance["maintenance"] = False
+            data_maintenance["maintenance_fin"] = ""
+            sauvegarder_donnees(data_maintenance)
+            st.session_state.mode_maintenance = False
+    except:
+        pass
 # ==============================================================================
 # --- 3. INTERFACE DE CONNEXION / INSCRIPTION ---
 # ==============================================================================
