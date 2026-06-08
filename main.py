@@ -273,3 +273,4 @@ else:
         st.session_state.user_connecte = None
         st.session_state.messages_chat = []
         st.rerun()
+        st.markdown("<p style='text-align: center; color: gray; font-size: 14px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
