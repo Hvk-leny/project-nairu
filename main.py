@@ -255,14 +255,19 @@ else:
                     
                     contexte_web = executer_recherche_web(prompt_utilisateur)
                     
+                    # 🛠️ AJOUT DE LA VARIABLE NOM DANS LES INSTRUCTIONS DE L'IA
+                    nom_utilisateur = st.session_state.user_connecte.capitalize()
+                    
                     system_instruction = (
                         "Tu es Nairu, un assistant de recherche IA ultra-performant et connecté au web en temps réel, développé par Leny et Eliott.\n"
-                        "Tu as un accès libre à Internet. Pour répondre à l'utilisateur, sers-toi obligatoirement des résultats de recherche Google/DuckDuckGo suivants :\n"
+                        f"Tu es actuellement en train de discuter avec l'utilisateur connecté qui s'appelle : {nom_utilisateur}.\n"
+                        f"Sache et retiens bien qu'il s'appelle {nom_utilisateur}. Tu dois être capable de t'en souvenir s'il te demande 'comment je m'appelle ?' ou 'qui suis-je ?'.\n"
+                        "Si l'utilisateur est Leny ou Eliott, agis avec eux de manière encore plus complice puisqu'ils sont tes créateurs.\n\n"
+                        "Pour répondre aux questions générales, sers-toi obligatoirement des résultats de recherche internet suivants :\n"
                         f"{contexte_web}\n\n"
                         "Règles importantes :\n"
                         "- Synthétise les informations trouvées de manière claire et intelligente.\n"
-                        "- Si les résultats contiennent des liens utiles, tu peux les citer pour aider l'utilisateur.\n"
-                        "- Reste amical, moderne et efficace."
+                        "- Reste amical, moderne, naturel et efficace."
                     )
                     
                     historique_complet = [{"role": "system", "content": system_instruction}] + st.session_state.messages_chat
