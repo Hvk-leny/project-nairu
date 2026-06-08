@@ -1,8 +1,3 @@
-Voici le code complet et nettoyé de ton application. J'ai placé la ligne des droits d'auteur **tout à la fin du fichier, complètement sortie des blocs conditionnels**. De cette façon, le message restera visible en permanence tout en bas de la page, que l'on soit connecté ou sur l'écran de connexion !
-
-Fais un **`Ctrl + A`** dans ton fichier `main.py` sur GitHub, efface tout, et colle cette version :
-
-```python
 import streamlit as st
 import json
 import os
@@ -293,5 +288,3 @@ else:
 # --- 5. PIED DE PAGE GLOBAL (VISIBLE TOUT LE TEMPS) ---
 # ==============================================================================
 st.markdown("<p style='text-align: center; color: gray; font-size: 14px; margin-top: 50px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
-
-```
