@@ -1,3 +1,8 @@
+Voici le code complet et nettoyé de ton application. J'ai placé la ligne des droits d'auteur **tout à la fin du fichier, complètement sortie des blocs conditionnels**. De cette façon, le message restera visible en permanence tout en bas de la page, que l'on soit connecté ou sur l'écran de connexion !
+
+Fais un **`Ctrl + A`** dans ton fichier `main.py` sur GitHub, efface tout, et colle cette version :
+
+```python
 import streamlit as st
 import json
 import os
@@ -18,7 +23,6 @@ def recuperer_ip_visiteur():
         return "127.0.0.1"
 
 def charger_utilisateurs():
-    # Comptes permanents qui ne s'effaceront JAMAIS
     comptes_permanents = {
         "admin1": {"email": "admin@nairu.com", "password": "adminnairu1", "ip": "127.0.0.1"},
         "leny": {"email": "leny@nairu.com", "password": "lenynairu", "ip": "0.0.0.0"},
@@ -37,7 +41,6 @@ def charger_utilisateurs():
             if "comptes" not in data:
                 data = {"comptes": {}, "banned_ips": []}
             
-            # On réinjecte de force vos comptes pour être sûr qu'ils restent là
             for nom, infos in comptes_permanents.items():
                 if nom not in data["comptes"]:
                     data["comptes"][nom] = infos
@@ -72,11 +75,16 @@ def est_ip_bannie(ip_address):
 def executer_recherche_web(requete):
     try:
         with DDGS() as ddgs:
-            resultats = [r for r in ddgs.text(requete, max_results=3)]
-            contexte = "\n".join([f"Titre: {res['title']}\nLien: {res['href']}\nExtrait: {res['body']}\n---" for res in resultats])
+            resultats = [r for r in ddgs.text(requete, max_results=4)]
+            if not resultats:
+                return "Aucun résultat trouvé sur le web pour cette recherche."
+            
+            contexte = ""
+            for i, res in enumerate(resultats, 1):
+                contexte += f"[{i}] Source : {res['title']}\nLien : {res['href']}\nInfos : {res['body']}\n---\n"
             return contexte
-    except:
-        return "Impossible d'accéder au web pour le moment."
+    except Exception as e:
+        return f"Erreur lors de la recherche web : {str(e)}"
 
 # ==============================================================================
 # --- 2. MISE EN PAGE & LOGIQUE DES SESSIONS ---
@@ -182,7 +190,6 @@ if st.session_state.statut_connexion == "Déconnecté":
 # --- 4. INTERFACE UNE FOIS CONNECTÉ ---
 # ==============================================================================
 else:
-    # 🔴 PANNEAU DE CONTRÔLE ADMIN POUR LENY & ELIOTT
     if st.session_state.user_connecte in ["admin1", "leny", "eliott"]:
         with st.sidebar:
             st.markdown("### 🛠️ Mode Administrateur")
@@ -249,13 +256,22 @@ else:
         try:
             client_groq = Groq(api_key="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")
             with st.chat_message("assistant"):
-                with st.spinner("Nairu fouille le web et réfléchit..."):
+                with st.spinner("Nairu fouille le web en direct et réfléchit..."):
+                    
                     contexte_web = executer_recherche_web(prompt_utilisateur)
-                    system_instruction = f"Tu es Nairu, une IA de recherche créée par Leny et Eliott. Utilise ces infos web si besoin : {contexte_web}"
+                    
+                    system_instruction = (
+                        "Tu es Nairu, un assistant de recherche IA ultra-performant et connecté au web en temps réel, développé par Leny et Eliott.\n"
+                        "Tu as un accès libre à Internet. Pour répondre à l'utilisateur, sers-toi obligatoirement des résultats de recherche Google/DuckDuckGo suivants :\n"
+                        f"{contexte_web}\n\n"
+                        "Règles importantes :\n"
+                        "- Synthétise les informations trouvées de manière claire et intelligente.\n"
+                        "- Si les résultats contiennent des liens utiles, tu peux les citer pour aider l'utilisateur.\n"
+                        "- Reste amical, moderne et efficace."
+                    )
                     
                     historique_complet = [{"role": "system", "content": system_instruction}] + st.session_state.messages_chat
                     
-                    # Changement du modèle pour utiliser la version mise à jour de Groq
                     reponse_brute = client_groq.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
                         messages=historique_complet
@@ -264,7 +280,6 @@ else:
                     st.write(texte_reponse)
             st.session_state.messages_chat.append({"role": "assistant", "content": texte_reponse})
         except Exception as e:
-            # Affiche la cause exacte du problème à l'écran pour debug plus facilement
             st.error(f"❌ Erreur Groq : {str(e)}")
 
     st.markdown("<br><hr>", unsafe_allow_html=True)
@@ -273,4 +288,10 @@ else:
         st.session_state.user_connecte = None
         st.session_state.messages_chat = []
         st.rerun()
-        st.markdown("<p style='text-align: center; color: gray; font-size: 14px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
+
+# ==============================================================================
+# --- 5. PIED DE PAGE GLOBAL (VISIBLE TOUT LE TEMPS) ---
+# ==============================================================================
+st.markdown("<p style='text-align: center; color: gray; font-size: 14px; margin-top: 50px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
+
+```
