@@ -513,4 +513,4 @@ if st.session_state.statut_connexion == "Connecté":
 # ==============================================================================
 st.markdown("<p style='text-align: center; color: gray; font-size: 14px; margin-top: 50px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: gray; font-size: 15px; margin-top: -30px;'>Créée par Eliott et Leny.</p>", unsafe_allow_html=True)
-st.markdown("<div style='position: fixed; bottom: 10px; right: 15px; color: gray; font-size: 12px; z-index: 9999;'>Version 10.</div>", unsafe_allow_html=True)
+st.markdown("<div style='position: fixed; bottom: 30px; right: 40px; color: gray; font-size: 11px; z-index: 99999; background: transparent; pointer-events: none;'>Version 10.</div>", unsafe_allow_html=True)
