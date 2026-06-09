@@ -270,9 +270,10 @@ elif st.session_state.statut_connexion == "Déconnecté":
 else:
     user_actuel = str(st.session_state.user_connecte).lower().strip()
     
-    # 🔴 SEUL LE COMPTE ADMIN1 A ACCÈS AU PANNEAU DE CONTRÔLE SÉCURITÉ & MAINTENANCE
-    if user_actuel == "admin1":
-        with st.sidebar:
+    # 📑 BARRE LATÉRALE GLOBALE (VISIBLE PAR TOUT LE MONDE)
+    with st.sidebar:
+        # --- CAS 1 : L'UTILISATEUR EST L'ADMIN1 ---
+        if user_actuel == "admin1":
             st.markdown("### 🛠️ Mode Administrateur")
             st.info(f"Connecté en tant que : {st.session_state.user_connecte}")
             
@@ -280,19 +281,17 @@ else:
             st.markdown("---")
             st.markdown("#### ⚙️ Gestion de la Maintenance")
             
-            # Case à cocher pour activer/désactiver instantanément
             etat_maintenance = st.checkbox("Activer le mode maintenance", value=st.session_state.mode_maintenance)
             
             if etat_maintenance != st.session_state.mode_maintenance:
                 data_totale = charger_utilisateurs()
                 data_totale["maintenance"] = etat_maintenance
                 if not etat_maintenance:
-                    data_totale["maintenance_fin"] = "" # Reset du temps si on décoche
+                    data_totale["maintenance_fin"] = ""
                 sauvegarder_donnees(data_totale)
                 st.session_state.mode_maintenance = etat_maintenance
                 st.rerun()
                 
-            # Configuration du Timer si la maintenance est active
             if st.session_state.mode_maintenance:
                 st.warning("⚠️ Le site est invisible pour les utilisateurs.")
                 temps_minutes = st.number_input("Durée de la maintenance (en minutes) :", min_value=1, max_value=1440, value=30)
@@ -305,6 +304,7 @@ else:
                     st.rerun()
             st.markdown("---")
             
+            # --- 👥 MODÉRATION DES COMPTES ---
             if st.checkbox("Voir la gestion des comptes"):
                 data_totale = charger_utilisateurs()
                 st.markdown("#### 👥 Modération des comptes")
@@ -349,11 +349,18 @@ else:
                                 st.success("Débloquée")
                                 st.rerun()
 
-    # 🟢 CHAT IA POUR TOUT LE MONDE
-    st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
-    if st.session_state.mode_maintenance:
-        st.sidebar.warning("⚠️ ATTENTION : Mode maintenance actif.")
+        # --- CAS 2 : UTILISATEUR CLASSIQUE (LENY, ELIOTT, ETC.) ---
+        else:
+            st.markdown("### 👤 Mon Profil")
+            st.success(f"Connecté en tant que : **{st.session_state.user_connecte}**")
+            st.markdown("---")
+            st.write("Bienvenue sur votre espace Nairu IA.")
+            if st.session_state.mode_maintenance:
+                st.warning("⚠️ Mode maintenance actif en arrière-plan.")
 
+    # 🟢 CHAT IA POUR TOUT LE MONDE (DANS LA PAGE PRINCIPALE)
+    st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
+    
     for msg in st.session_state.messages_chat:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
@@ -407,7 +414,6 @@ else:
         st.session_state.user_connecte = None
         st.session_state.messages_chat = []
         st.rerun()
-
 # ==============================================================================
 # --- 4.5 EXTENSION : SYSTÈME DE MÉMOIRE LONG TERME (STYLE CHATGPT) ---
 # ==============================================================================
