@@ -512,4 +512,4 @@ if st.session_state.statut_connexion == "Connecté":
 # --- 5. PIED DE PAGE GLOBAL (VISIBLE TOUT LE TEMPS) ---
 # ==============================================================================
 st.markdown("<p style='text-align: center; color: gray; font-size: 14px; margin-top: 50px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: gray; font-size: 15px; margin-top: 10px;'>© 2026 Créée par Eliott et Leny.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray; font-size: 15px; margin-top: 1px;'>© 2026 Créée par Eliott et Leny.</p>", unsafe_allow_html=True)
