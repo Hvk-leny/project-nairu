@@ -23,8 +23,8 @@ def charger_utilisateurs():
     comptes_permanents = {
         "admin_nairu_leny": {"email": "leny.admin@nairu.com", "password": "adminnairu1", "ip": "127.0.0.1"},
         "admin_nairu_eliott": {"email": "eliott.admin@nairu.com", "password": "adminnairu2", "ip": "127.0.0.1"},
-        "leny": {"email": "leny@nairu.com", "password": "lenynairu", "ip": "0.0.0.0"},
-        "eliott": {"email": "eliott@nairu.com", "password": "eliottnairu", "ip": "0.0.0.0"},
+        "leny": {"email": "lenygrondin02@gmail.com", "password": "lenynairu", "ip": "0.0.0.0"},
+        "eliott": {"email": "eliott31240@gmail.com", "password": "eliottnairu", "ip": "0.0.0.0"},
         "exemple": {"email": "exemple@nairu.com", "password": "exemple", "ip": "0.0.0.0"}
     }
 
