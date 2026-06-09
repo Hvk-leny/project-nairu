@@ -2,6 +2,7 @@ import streamlit as st
 import json
 import os
 import requests
+import datetime
 from groq import Groq
 from duckduckgo_search import DDGS
 
@@ -9,6 +10,7 @@ from duckduckgo_search import DDGS
 # --- 1. FONCTIONS DE LA BASE DE DONNÉES JSON (AVEC SÉCURITÉ IP) ---
 # ==============================================================================
 DB_FILE = "utilisateurs.json"
+MEMOIRE_FILE = "memoire.json"
 
 def recuperer_ip_visiteur():
     try:
@@ -18,7 +20,7 @@ def recuperer_ip_visiteur():
         return "127.0.0.1"
 
 def charger_utilisateurs():
-comptes_permanents = {
+    comptes_permanents = {
         "admin_nairu_leny": {"email": "leny.admin@nairu.com", "password": "adminnairu1", "ip": "127.0.0.1"},
         "admin_nairu_eliott": {"email": "eliott.admin@nairu.com", "password": "adminnairu2", "ip": "127.0.0.1"},
         "leny": {"email": "leny@nairu.com", "password": "lenynairu", "ip": "0.0.0.0"},
@@ -60,7 +62,7 @@ def sauvegarder_utilisateur(username, email, password, ip_address):
 def ip_deja_utilisee(ip_address):
     data = charger_utilisateurs()
     for nom, infos in data["comptes"].items():
-        if infos.get("ip") == ip_address and nom not in ["exemple", "admin1", "leny", "eliott"]:
+        if infos.get("ip") == ip_address and nom not in ["exemple", "admin_nairu_leny", "admin_nairu_eliott", "leny", "eliott"]:
             return True
     return False
 
@@ -82,6 +84,38 @@ def executer_recherche_web(requete):
     except Exception as e:
         return f"Erreur lors de la recherche web : {str(e)}"
 
+def charger_memoire():
+    if not os.path.exists(MEMOIRE_FILE):
+        with open(MEMOIRE_FILE, "w", encoding="utf-8") as f:
+            json.dump({}, f, indent=4)
+        return {}
+    try:
+        with open(MEMOIRE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def sauvegarder_memoire(data):
+    with open(MEMOIRE_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
+
+def calculer_age_nairu():
+    # Date de création : 6 juin 2026 à 22h00
+    date_creation = datetime.datetime(2026, 6, 6, 22, 0)
+    maintenant = datetime.datetime.now()
+    difference = maintenant - date_creation
+    
+    jours = difference.days
+    heures = difference.seconds // 3600
+    minutes = (difference.seconds % 3600) // 60
+    
+    if jours > 0:
+        return f"{jours} jour(s), {heures} heure(s) et {minutes} minute(s)"
+    elif heures > 0:
+        return f"{heures} heure(s) et {minutes} minute(s)"
+    else:
+        return f"{minutes} minute(s)"
+
 # ==============================================================================
 # --- 2. MISE EN PAGE & LOGIQUE DES SESSIONS ---
 # ==============================================================================
@@ -95,7 +129,6 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* 🔥 CORRECTION : On cache l'icône UNIQUEMENT dans l'expander pour libérer la Sidebar */
     [data-testid="stExpander"] [data-testid="stIconMaterial"] { 
         font-size: 0px !important; 
         color: transparent !important; 
@@ -116,7 +149,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Chargement de l'état de la maintenance depuis la bdd
 data_maintenance = charger_utilisateurs()
 
 if "mode_maintenance" not in st.session_state:
@@ -131,10 +163,13 @@ if "messages_chat" not in st.session_state:
 if "forcer_formulaire_admin" not in st.session_state:
     st.session_state.forcer_formulaire_admin = False
 
+# Gestion de la clé API de secours (évite qu'elle s'enlève au rafraîchissement)
+if "groq_api_key" not in st.session_state:
+    st.session_state.groq_api_key = "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"
+
 # Vérification automatique du Timer de maintenance
 if st.session_state.mode_maintenance and data_maintenance.get("maintenance_fin"):
     try:
-        import datetime
         fin_maintenance = datetime.datetime.fromisoformat(data_maintenance["maintenance_fin"])
         if datetime.datetime.now() > fin_maintenance:
             data_maintenance["maintenance"] = False
@@ -143,10 +178,10 @@ if st.session_state.mode_maintenance and data_maintenance.get("maintenance_fin")
             st.session_state.mode_maintenance = False
     except:
         pass
+
 # ==============================================================================
 # --- 3. INTERFACE DE CONNEXION / INSCRIPTION ---
 # ==============================================================================
-# Si le site est en maintenance, que personne n'est connecté, et qu'on ne force pas l'accès admin
 if st.session_state.mode_maintenance and st.session_state.statut_connexion == "Déconnecté" and not st.session_state.forcer_formulaire_admin:
     col_gauche, col_centre, col_droite = st.columns([1, 2, 1])
     with col_centre:
@@ -154,7 +189,6 @@ if st.session_state.mode_maintenance and st.session_state.statut_connexion == "D
         st.error("### 🛠️ Site temporairement indisponible")
         st.info("Nairu AI est actuellement en cours de maintenance ou de mise à jour.")
         
-        # Calcul et affichage du timer restant
         if data_maintenance.get("maintenance_fin"):
             try:
                 fin = datetime.datetime.fromisoformat(data_maintenance["maintenance_fin"])
@@ -171,14 +205,12 @@ if st.session_state.mode_maintenance and st.session_state.statut_connexion == "D
         st.link_button("📸 Contacter Eliott sur Instagram", "https://instagram.com/eliott31tls", use_container_width=True)
         
         st.markdown("<br><br><hr>", unsafe_allow_html=True)
-        # Bouton secret pour ouvrir le formulaire de connexion
         if st.button("🔒 Connexion Administrateur", use_container_width=False):
             st.session_state.forcer_formulaire_admin = True
             st.rerun()
             
-    st.stop() # On bloque l'affichage de l'accueil pour les autres
+    st.stop()
 
-# Interface classique (visible si pas de maintenance, ou si l'admin force l'entrée)
 elif st.session_state.statut_connexion == "Déconnecté":
     st.title("bienvenue sur nairu")
     col_gauche, col_centre, col_droite = st.columns([1, 2, 1])
@@ -186,7 +218,7 @@ elif st.session_state.statut_connexion == "Déconnecté":
     with col_centre:
         with st.container(border=True):
             if st.session_state.forcer_formulaire_admin:
-                st.warning("⚠️ Mode Maintenance Actif - Accès réservé à l'Administrateur")
+                st.warning("⚠️ Mode Maintenance Actif - Accès réservé aux Administrateurs")
             
             tab_login, tab_register = st.tabs(["🔒 Connexion", "✨ Créer un compte"])
             
@@ -204,10 +236,8 @@ elif st.session_state.statut_connexion == "Déconnecté":
                         if est_ip_bannie(user_ip):
                             st.error("❌ Accès refusé. Votre connexion internet a été bannie de ce site.")
                         elif identifiant in data_totale["comptes"] and data_totale["comptes"][identifiant]["password"] == code_secret:
-                            
-                            # SÉCURITÉ : Si maintenance active, seul admin1 passe
-                            if st.session_state.mode_maintenance and identifiant != "admin1":
-                                st.error("🛑 Ce site est en maintenance. Seul le compte admin1 peut se connecter.")
+                            if st.session_state.mode_maintenance and identifiant not in ["admin_nairu_leny", "admin_nairu_eliott"]:
+                                st.error("🛑 Ce site est en maintenance. Seuls les comptes admins peuvent se connecter.")
                             else:
                                 st.session_state.statut_connexion = "Connecté"
                                 st.session_state.user_connecte = identifiant
@@ -239,7 +269,7 @@ elif st.session_state.statut_connexion == "Déconnecté":
                             elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "":
                                 st.warning("Veuillez remplir les champs.")
                             elif nouvel_identifiant.lower().strip() in data_totale["comptes"]:
-                                relative_error = st.error("Cet identifiant existe déjà !")
+                                st.error("Cet identifiant existe déjà !")
                             elif ip_deja_utilisee(user_ip):
                                 st.error("❌ Un compte a déjà été créé avec votre connexion internet.")
                             else:
@@ -271,14 +301,20 @@ elif st.session_state.statut_connexion == "Déconnecté":
 else:
     user_actuel = str(st.session_state.user_connecte).lower().strip()
     
-    # 📑 BARRE LATÉRALE GLOBALE (VISIBLE PAR TOUT LE MONDE)
-    with st.sidebar:
-        # --- CAS 1 : L'UTILISATEUR EST L'ADMIN1 ---
-        if user_actuel == "admin1":
+    # Barre de configuration de secours si la clé sautille
+    if not st.session_state.groq_api_key or st.session_state.groq_api_key == "":
+        st.warning("⚠️ Clé Groq manquante. Merci de la renseigner pour activer le chat :")
+        nouvelle_cle = st.text_input("Colle ta clé Groq (gsk_...) ici :", type="password")
+        if nouvelle_cle:
+            st.session_state.groq_api_key = nouvelle_cle.strip()
+            st.rerun()
+
+    # Activation de la Sidebar pour les deux comptes admins
+    if user_actuel in ["admin_nairu_leny", "admin_nairu_eliott"]:
+        with st.sidebar:
             st.markdown("### 🛠️ Mode Administrateur")
             st.info(f"Connecté en tant que : {st.session_state.user_connecte}")
             
-            # --- ⚙️ GESTION DE LA MAINTENANCE ---
             st.markdown("---")
             st.markdown("#### ⚙️ Gestion de la Maintenance")
             
@@ -305,13 +341,13 @@ else:
                     st.rerun()
             st.markdown("---")
             
-            # --- 👥 MODÉRATION DES COMPTES ---
             if st.checkbox("Voir la gestion des comptes"):
                 data_totale = charger_utilisateurs()
                 st.markdown("#### 👥 Modération des comptes")
                 
                 for nom, infos in list(data_totale["comptes"].items()):
-                    if nom not in ["admin1", "leny", "eliott", "exemple"]:
+                    # On protège les admins et vos profils de la suppression
+                    if nom not in ["admin_nairu_leny", "admin_nairu_eliott", "leny", "eliott", "exemple"]:
                         st.markdown(f"**Identifiant :** `{nom}`")
                         st.caption(f"IP : {infos.get('ip', '0.0.0.0')} | Email : {infos.get('email', 'N/A')}")
                         
@@ -350,18 +386,11 @@ else:
                                 st.success("Débloquée")
                                 st.rerun()
 
-        # --- CAS 2 : UTILISATEUR CLASSIQUE (LENY, ELIOTT, ETC.) ---
-        else:
-            st.markdown("### 👤 Mon Profil")
-            st.success(f"Connecté en tant que : **{st.session_state.user_connecte}**")
-            st.markdown("---")
-            st.write("Bienvenue sur votre espace Nairu IA.")
-            if st.session_state.mode_maintenance:
-                st.warning("⚠️ Mode maintenance actif en arrière-plan.")
-
-    # 🟢 CHAT IA POUR TOUT LE MONDE (DANS LA PAGE PRINCIPALE)
+    # 🟢 CHAT IA POUR TOUT LE MONDE
     st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
-    
+    if st.session_state.mode_maintenance:
+        st.sidebar.warning("⚠️ ATTENTION : Mode maintenance actif.")
+
     for msg in st.session_state.messages_chat:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
@@ -374,7 +403,13 @@ else:
         st.session_state.messages_chat.append({"role": "user", "content": prompt_utilisateur})
         
         try:
-            client_groq = Groq(api_key=st.secrets["GROQ_API_KEY"])
+            # Récupération de la clé (Secrets ou session d'urgence)
+            try:
+                api_key_to_use = st.secrets["GROQ_API_KEY"]
+            except:
+                api_key_to_use = st.session_state.groq_api_key
+
+            client_groq = Groq(api_key=api_key_to_use)
             
             with st.chat_message("assistant"):
                 with st.spinner("Nairu fouille le web en direct et réfléchit..."):
@@ -382,11 +417,24 @@ else:
                     contexte_web = executer_recherche_web(prompt_utilisateur)
                     nom_utilisateur = st.session_state.user_connecte.capitalize()
                     
+                    # Récupération et formatage des souvenirs pour l'IA
+                    memoire_globale = charger_memoire()
+                    souvenirs_utilisateur = memoire_globale.get(user_actuel, [])
+                    contexte_memoire_systeme = ""
+                    if souvenirs_utilisateur:
+                        contexte_memoire_systeme = "\n- Faits importants à retenir absolument sur cet utilisateur (sa mémoire à long terme) :\n" + "\n".join([f"  * {s}" for s in souvenirs_utilisateur])
+                    
+                    # On calcule l'âge de Nairu en direct
+                    age_nairu = calculer_age_nairu()
+
                     system_instruction = (
                         "Tu es Nairu, un assistant de recherche IA ultra-performant et connecté au web en temps réel, développé par Leny et Eliott.\n"
+                        f"Tu as été créé le 6 juin 2026 vers 22h. Actuellement, tu existes depuis exactement : {age_nairu}.\n"
+                        "Si l'utilisateur te demande quand tu as été créé, ton âge, ou depuis quand tu existes, réponds-lui fièrement avec ces données exactes.\n"
                         f"Tu es actuellement en train de discuter avec l'utilisateur connecté qui s'appelle : {nom_utilisateur}.\n"
-                        f"Sache et retiens bien qu'il s'appelle {nom_utilisateur}. Tu dois t'en souvenir s'il te demande 'comment je m'appelle ?'.\n"
-                        "Si l'utilisateur est Leny ou Eliott, agis avec eux de manière encore plus complice puisqu'ils sont tes créateurs.\n\n"
+                        f"Sache et retiens bien qu'il s'appelle {nom_utilisateur}. Tu devez être capable de t'en souvenir grâce à sa mémoire si elle contient des indications.\n"
+                        "Si l'utilisateur est Leny ou Eliott (ou l'un des comptes admin_nairu_leny / admin_nairu_eliott), agis avec eux de manière encore plus complice puisqu'ils sont tes créateurs.\n"
+                        f"{contexte_memoire_systeme}\n\n"
                         "Pour répondre à la question actuelle, sers-toi des résultats de recherche internet suivants :\n"
                         f"{contexte_web}\n\n"
                         "Règles importantes :\n"
@@ -408,6 +456,7 @@ else:
             
         except Exception as e:
             st.error(f"❌ Erreur Groq : {str(e)}")
+            st.session_state.groq_api_key = ""
 
     st.markdown("<br><hr>", unsafe_allow_html=True)
     if st.button("🔴 Déconnexion", use_container_width=True):
@@ -415,32 +464,14 @@ else:
         st.session_state.user_connecte = None
         st.session_state.messages_chat = []
         st.rerun()
+
 # ==============================================================================
 # --- 4.5 EXTENSION : SYSTÈME DE MÉMOIRE LONG TERME (STYLE CHATGPT) ---
 # ==============================================================================
-MEMOIRE_FILE = "memoire.json"
-
-def charger_memoire():
-    if not os.path.exists(MEMOIRE_FILE):
-        with open(MEMOIRE_FILE, "w", encoding="utf-8") as f:
-            json.dump({}, f, indent=4)
-        return {}
-    try:
-        with open(MEMOIRE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
-        return {}
-
-def sauvegarder_memoire(data):
-    with open(MEMOIRE_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-
-# Exécution de la logique de mémoire si l'utilisateur est connecté
 if st.session_state.statut_connexion == "Connecté":
-    user_actuel = st.session_state.user_connecte
+    user_actuel = str(st.session_state.user_connecte).lower().strip()
     memoire_globale = charger_memoire()
     
-    # Initialiser la mémoire de l'utilisateur si elle n'existe pas
     if user_actuel not in memoire_globale:
         memoire_globale[user_actuel] = []
         sauvegarder_memoire(memoire_globale)
@@ -448,7 +479,6 @@ if st.session_state.statut_connexion == "Connecté":
     st.markdown("<br><hr>", unsafe_allow_html=True)
     st.markdown("### 🧠 Mémoire à long terme de Nairu")
     
-    # Interface de contrôle de la mémoire (style ChatGPT)
     col_mem_info, col_mem_action = st.columns([2, 1])
     
     with col_mem_info:
@@ -472,20 +502,13 @@ if st.session_state.statut_connexion == "Connecté":
             nouveau_souvenir = st.text_input("Ajouter un fait à retenir :", placeholder="Ex: Je m'appelle Falkon / J'aime Fortnite")
             bouton_mem = st.form_submit_button("Enregistrer le souvenir", use_container_width=True)
             
-            if bouton_mem and nouveau_souvenir.strip() != "":
+            if ... and nouveau_souvenir.strip() != "":
                 memoire_globale[user_actuel].append(nouveau_souvenir.strip())
                 sauvegarder_memoire(memoire_globale)
                 st.success("Souvenir enregistré !")
                 st.rerun()
 
-    # --- INJECTION AUTOMATIQUE DE LA MÉMOIRE DANS GROQ ---
-    # On récupère la liste des souvenirs pour l'intégrer au prompt système de manière invisible
-    souvenirs_utilisateur = memoire_globale.get(user_actuel, [])
-    contexte_memoire_systeme = ""
-    if souvenirs_utilisateur:
-        contexte_memoire_systeme = "\n- Faits importants à retenir absolument sur cet utilisateur (sa mémoire) :\n" + "\n".join([f"  * {s}" for s in souvenirs_utilisateur])
-    
-    # Note pour faire le lien avec ton code :
-    # Pour que Groq lise ces souvenirs, il te suffira d'ajouter `{contexte_memoire_systeme}` 
-    # à l'intérieur de ta variable `system_instruction` dans la section 4 de ton code actuel.
 # ==============================================================================
+# --- 5. PIED DE PAGE GLOBAL (VISIBLE TOUT LE TEMPS) ---
+# ==============================================================================
+st.markdown("<p style='text-align: center; color: gray; font-size: 14px; margin-top: 50px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
