@@ -119,14 +119,226 @@ def calculer_age_nairu():
 # ==============================================================================
 # --- 2. MISE EN PAGE & LOGIQUE DES SESSIONS ---
 # ==============================================================================
-st.set_page_config(
-    page_title="NAIRU - AI",
-    page_icon="💬",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.markdown("""
+<style>
 
-st.markdown(
+/* =========================
+   FOND PREMIUM
+========================= */
+
+.stApp{
+    background:
+    radial-gradient(circle at top left,#1e3a8a 0%,transparent 40%),
+    radial-gradient(circle at top right,#0891b2 0%,transparent 35%),
+    linear-gradient(135deg,#020617,#0f172a,#020617);
+}
+
+/* =========================
+   TEXTE
+========================= */
+
+html, body, p, span, label{
+    color:#f8fafc !important;
+}
+
+h1,h2,h3,h4,h5,h6{
+    color:white !important;
+    font-weight:700 !important;
+}
+
+/* =========================
+   CARTES PREMIUM
+========================= */
+
+[data-testid="stForm"],
+[data-testid="stExpander"],
+[data-testid="stChatMessage"]{
+
+    background:rgba(15,23,42,.72) !important;
+
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(96,165,250,.15);
+
+    border-radius:22px;
+
+    box-shadow:
+    0 10px 40px rgba(0,0,0,.35);
+
+    padding:12px;
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+.stTextInput input{
+
+    background:#0f172a !important;
+
+    color:white !important;
+
+    border-radius:14px !important;
+
+    border:1px solid rgba(96,165,250,.25) !important;
+}
+
+.stTextInput input:focus{
+
+    border:1px solid #3b82f6 !important;
+
+    box-shadow:
+    0 0 0 1px #3b82f6 !important;
+}
+
+/* =========================
+   CHAT INPUT
+========================= */
+
+[data-testid="stChatInput"]{
+
+    background:#0f172a !important;
+
+    border-radius:18px !important;
+
+    border:1px solid rgba(96,165,250,.25) !important;
+}
+
+/* =========================
+   BOUTONS
+========================= */
+
+.stButton > button{
+
+    background:
+    linear-gradient(
+    135deg,
+    #2563eb,
+    #06b6d4
+    ) !important;
+
+    color:white !important;
+
+    border:none !important;
+
+    border-radius:14px !important;
+
+    font-weight:700 !important;
+
+    transition:all .25s ease;
+}
+
+.stButton > button:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+    0 0 25px rgba(37,99,235,.55);
+}
+
+/* =========================
+   ONGLETS
+========================= */
+
+.stTabs [data-baseweb="tab"]{
+
+    border-radius:14px;
+
+    font-weight:600;
+
+    transition:.2s;
+}
+
+.stTabs [aria-selected="true"]{
+
+    background:
+    linear-gradient(
+    135deg,
+    #2563eb,
+    #06b6d4
+    ) !important;
+
+    color:white !important;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+[data-testid="stSidebar"]{
+
+    background:#020617 !important;
+
+    border-right:
+    1px solid rgba(96,165,250,.15);
+}
+
+/* =========================
+   EXPANDER
+========================= */
+
+[data-testid="stExpander"] summary{
+
+    font-weight:600;
+}
+
+[data-testid="stExpander"] summary::after{
+
+    content:'➜';
+
+    color:#38bdf8;
+
+    position:absolute;
+
+    right:15px;
+}
+
+/* =========================
+   CHAT
+========================= */
+
+[data-testid="stChatMessage"]{
+
+    margin-bottom:10px;
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+::-webkit-scrollbar{
+    width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#3b82f6;
+    border-radius:20px;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+.main .block-container{
+
+    animation:fadeIn .4s ease;
+}
+
+@keyframes fadeIn{
+
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+</style>
+""", unsafe_allow_html=True)
     """
     <style>
     [data-testid="stExpander"] [data-testid="stIconMaterial"] { 
