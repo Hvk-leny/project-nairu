@@ -126,13 +126,20 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🌐 INJECTION DE LA BALISE DE VÉRIFICATION GOOGLE ET DU STYLE CSS
-st.markdown(
+# 🌐 INJECTION FORCEE DE LA BALISE GOOGLE DANS LE CORPS DE LA PAGE
+import streamlit.components.v1 as components
+components.html(
     """
     <meta name="google-site-verification" content="Ih0SvT8spLCGn5y0eaJnMuFrArHwURmtdDCuNdIEUk8" />
-    
+    """,
+    height=0, # Invisible pour l'utilisateur
+)
+
+# 🎨 STYLE CSS POUR LES EXPANDERS
+st.markdown(
+    """
     <style>
-    /* 🔥 CORRECTION : On cache l'icône UNIQUEMENT dans l'expander pour libérer la Sidebar */
+    /* On cache l'icône UNIQUEMENT dans l'expander pour libérer la Sidebar */
     [data-testid="stExpander"] [data-testid="stIconMaterial"] { 
         font-size: 0px !important; 
         color: transparent !important; 
