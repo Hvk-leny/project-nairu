@@ -1,0 +1,5 @@
+User-agent: *
+Disallow:
+
+# Google Search Console Verification
+Link: <googlea378adfae08e5151.html>; rel="canonical"
