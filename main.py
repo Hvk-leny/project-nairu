@@ -20,7 +20,7 @@ import streamlit.components.v1 as components
 # --- 1. CONFIGURATION & CONSTANTES ---
 # ==============================================================================
 
-FICHIER_UTILISATEURS = "utilisateurs.json"
+FICHIER_UTILISATEURS = "database.json"
 FICHIER_MEMOIRE = "memoire.json"
 DATE_CREATION_NAIRU = datetime.datetime(2026, 6, 6, 22, 0)
 COMPTES_ADMIN = ["admin_nairu_leny", "admin_nairu_eliott"]
