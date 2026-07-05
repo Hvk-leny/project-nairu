@@ -7,7 +7,7 @@ from openai import OpenAI
 import streamlit.components.v1 as components
 
 # ==============================================================================
-# --- CONFIGURATION DE LA CLÉ API (METS TA CLÉ ICI SANS LA COUPER) ---
+# --- CONFIGURATION DE LA CLÉ API ---
 # ==============================================================================
 CLE_OPENROUTER = "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"
 
@@ -156,53 +156,3 @@ elif st.session_state.statut_connexion == "Déconnecté":
                             user_ip = recuperer_ip_visiteur()
                             if est_ip_bannie(user_ip): st.error("❌ Connexion bannie.")
                             elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "": st.warning("Champs vides.")
-                            elif nouvel_identifiant in data_totale["comptes"]: st.error("Cet identifiant existe déjà !")
-                            elif ip_deja_utilisee(user_ip): st.error("❌ Un compte a déjà été créé.")
-                            else:
-                                sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code, user_ip)
-                                st.success("🎉 Compte créé ! Connectez-vous.")
-
-        if st.session_state.forcer_formulaire_admin and st.button("⬅️ Retour"):
-            st.session_state.forcer_formulaire_admin = False
-            st.rerun()
-
-# ==============================================================================
-# --- 4. INTERFACE UNE FOIS CONNECTÉ ---
-# ==============================================================================
-else:
-    user_actuel = str(st.session_state.user_connecte).lower().strip()
-    
-    if "openrouter_api_key" not in st.session_state:
-        st.session_state.openrouter_api_key = CLE_OPENROUTER
-
-    if user_actuel in ["admin_nairu_leny", "admin_nairu_eliott"]:
-        with st.sidebar:
-            st.markdown("### 🛠️ Mode Administrateur")
-            st.info(f"Connecté : {st.session_state.user_connecte}")
-            st.markdown("---")
-            st.markdown("#### ⚙️ Maintenance")
-            etat_maintenance = st.checkbox("Activer la maintenance", value=st.session_state.mode_maintenance)
-            
-            if etat_maintenance != st.session_state.mode_maintenance:
-                data_totale = charger_utilisateurs()
-                data_totale["maintenance"] = etat_maintenance
-                if not etat_maintenance: data_totale["maintenance_fin"] = ""
-                sauvegarder_donnees(data_totale)
-                st.session_state.mode_maintenance = etat_maintenance
-                st.rerun()
-                
-            if st.session_state.mode_maintenance:
-                st.warning("⚠️ Mode maintenance actif.")
-                tm = st.number_input("Durée (minutes) :", min_value=1, max_value=1440, value=30)
-                if st.button("⏱️ Activer le Timer", use_container_width=True):
-                    data_totale = charger_utilisateurs()
-                    hf = datetime.datetime.now() + datetime.timedelta(minutes=tm)
-                    data_totale["maintenance_fin"] = hf.isoformat()
-                    sauvegarder_donnees(data_totale)
-                    st.rerun()
-            st.markdown("---")
-            
-            if st.checkbox("Voir la gestion des comptes"):
-                data_totale = charger_utilisateurs()
-                st.markdown("#### 👥 Modération")
-                for nom
