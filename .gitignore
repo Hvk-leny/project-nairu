@@ -1,0 +1,15 @@
+# Secrets - NE JAMAIS COMMITER
+.streamlit/secrets.toml
+
+# Données utilisateurs (contiennent emails, IPs, hash de mots de passe)
+database.json
+memoire.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
