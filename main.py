@@ -22,7 +22,7 @@ import streamlit.components.v1 as components
 
 FICHIER_UTILISATEURS = "database.json"
 DATE_CREATION_NAIRU = datetime.datetime(2026, 6, 6, 22, 0)
-COMPTES_ADMIN = ["admin_nairu_leny", "admin_nairu_eliott"]
+COMPTES_ADMIN = ["eliott", "leny"]
 MODELE_GROQ = "llama-3.3-70b-versatile"
 
 
