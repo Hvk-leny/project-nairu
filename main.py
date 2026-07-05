@@ -21,7 +21,6 @@ import streamlit.components.v1 as components
 # ==============================================================================
 
 FICHIER_UTILISATEURS = "database.json"
-FICHIER_MEMOIRE = "memoire.json"
 DATE_CREATION_NAIRU = datetime.datetime(2026, 6, 6, 22, 0)
 COMPTES_ADMIN = ["admin_nairu_leny", "admin_nairu_eliott"]
 MODELE_GROQ = "llama-3.3-70b-versatile"
@@ -51,19 +50,26 @@ def verifier_mot_de_passe(mot_de_passe: str, hash_stocke: str) -> bool:
 
 
 # ==============================================================================
-# --- 3. ACCÈS AUX DONNÉES (UTILISATEURS & MÉMOIRE) ---
+# --- 3. ACCÈS AUX DONNÉES (database.json) ---
 # ==============================================================================
 
 def charger_utilisateurs() -> dict:
     if not os.path.exists(FICHIER_UTILISATEURS):
-        base = {"comptes": {}, "banned_ips": [], "maintenance": False, "maintenance_fin": ""}
+        base = {"users": {}, "banned_ips": [], "maintenance": False, "maintenance_fin": ""}
         sauvegarder_donnees(base)
         return base
     try:
         with open(FICHIER_UTILISATEURS, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
     except (json.JSONDecodeError, OSError):
-        return {"comptes": {}, "banned_ips": [], "maintenance": False, "maintenance_fin": ""}
+        return {"users": {}, "banned_ips": [], "maintenance": False, "maintenance_fin": ""}
+
+    # Sécurité : s'assurer que les clés attendues existent même sur un ancien fichier
+    data.setdefault("users", {})
+    data.setdefault("banned_ips", [])
+    data.setdefault("maintenance", False)
+    data.setdefault("maintenance_fin", "")
+    return data
 
 
 def sauvegarder_donnees(data: dict) -> None:
@@ -71,30 +77,15 @@ def sauvegarder_donnees(data: dict) -> None:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 
-def sauvegarder_utilisateur(username: str, email: str, mot_de_passe: str, ip: str) -> None:
+def sauvegarder_utilisateur(username: str, mot_de_passe: str, ip: str) -> None:
+    """Crée un nouveau compte : hash le mot de passe et l'écrit dans database.json."""
     data = charger_utilisateurs()
-    data["comptes"][username.lower().strip()] = {
-        "email": email.strip(),
-        "password": hasher_mot_de_passe(mot_de_passe),
+    data["users"][username.lower().strip()] = {
+        "code": hasher_mot_de_passe(mot_de_passe),
+        "history": [],
         "ip": ip,
     }
     sauvegarder_donnees(data)
-
-
-def charger_memoire() -> dict:
-    if not os.path.exists(FICHIER_MEMOIRE):
-        sauvegarder_memoire({})
-        return {}
-    try:
-        with open(FICHIER_MEMOIRE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return {}
-
-
-def sauvegarder_memoire(data: dict) -> None:
-    with open(FICHIER_MEMOIRE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
 
 
 # ==============================================================================
@@ -118,7 +109,7 @@ def est_ip_bannie(ip: str) -> bool:
 def ip_deja_utilisee(ip: str) -> bool:
     data = charger_utilisateurs()
     exceptions = ["admin1", "leny", "eliott"] + COMPTES_ADMIN
-    for utilisateur, infos in data["comptes"].items():
+    for utilisateur, infos in data["users"].items():
         if infos.get("ip") == ip and utilisateur not in exceptions:
             return True
     return False
@@ -252,11 +243,11 @@ elif st.session_state.statut_connexion == "Déconnecté":
                     if st.form_submit_button("Se connecter", use_container_width=True):
                         user_ip = recuperer_ip_visiteur()
                         data_totale = charger_utilisateurs()
-                        compte = data_totale["comptes"].get(identifiant)
+                        compte = data_totale["users"].get(identifiant)
 
                         if est_ip_bannie(user_ip):
                             st.error("❌ Accès refusé. IP bannie.")
-                        elif compte and verifier_mot_de_passe(code_secret, compte["password"]):
+                        elif compte and verifier_mot_de_passe(code_secret, compte["code"]):
                             if st.session_state.mode_maintenance and identifiant not in COMPTES_ADMIN:
                                 st.error("🛑 Ce site est en maintenance.")
                             else:
@@ -276,23 +267,23 @@ elif st.session_state.statut_connexion == "Déconnecté":
                     st.markdown("> *Système anti-spam : Une seule création de compte par IP.*")
                     with st.form(key="form_inscription"):
                         nouvel_identifiant = st.text_input("Choisis un identifiant :", key="reg_username")
-                        nouvel_email = st.text_input("Adresse Email :", placeholder="votre@email.com", key="reg_email")
                         nouveau_code = st.text_input("Choisis un code secret :", type="password", key="reg_password")
 
                         if st.form_submit_button("Créer mon compte", use_container_width=True):
                             data_totale = charger_utilisateurs()
                             user_ip = recuperer_ip_visiteur()
+                            identifiant_propre = nouvel_identifiant.lower().strip()
 
                             if est_ip_bannie(user_ip):
                                 st.error("❌ Connexion bannie.")
-                            elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "":
+                            elif identifiant_propre == "" or nouveau_code.strip() == "":
                                 st.warning("Champs vides.")
-                            elif nouvel_identifiant.lower().strip() in data_totale["comptes"]:
+                            elif identifiant_propre in data_totale["users"]:
                                 st.error("Cet identifiant existe déjà !")
                             elif ip_deja_utilisee(user_ip):
                                 st.error("❌ Un compte a déjà été créé.")
                             else:
-                                sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code, user_ip)
+                                sauvegarder_utilisateur(nouvel_identifiant, nouveau_code, user_ip)
                                 st.success("🎉 Compte créé ! Connectez-vous.")
 
         if st.session_state.forcer_formulaire_admin and st.button("⬅️ Retour"):
@@ -349,11 +340,11 @@ else:
                 st.markdown("#### 👥 Modération")
                 comptes_proteges = COMPTES_ADMIN + ["leny", "eliott", "exemple"]
 
-                for nom, infos in list(data_totale["comptes"].items()):
+                for nom, infos in list(data_totale["users"].items()):
                     if nom in comptes_proteges:
                         continue
                     st.markdown(f"**Identifiant :** `{nom}`")
-                    st.caption(f"IP : {infos.get('ip', '0.0')} | Email : {infos.get('email', 'N/A')}")
+                    st.caption(f"IP : {infos.get('ip', '0.0')}")
 
                     c_ban, c_del = st.columns(2)
                     with c_ban:
@@ -361,12 +352,12 @@ else:
                             ip_a_bannir = infos.get("ip")
                             if ip_a_bannir and ip_a_bannir not in data_totale["banned_ips"]:
                                 data_totale["banned_ips"].append(ip_a_bannir)
-                            del data_totale["comptes"][nom]
+                            del data_totale["users"][nom]
                             sauvegarder_donnees(data_totale)
                             st.rerun()
                     with c_del:
                         if st.button("🗑️ Suppr", key=f"d_{nom}", use_container_width=True):
-                            del data_totale["comptes"][nom]
+                            del data_totale["users"][nom]
                             sauvegarder_donnees(data_totale)
                             st.rerun()
                     st.markdown("---")
@@ -390,8 +381,8 @@ else:
                 with st.spinner("Nairu réfléchit..."):
                     contexte_web = executer_recherche_web(prompt)
                     nom_utilisateur = st.session_state.user_connecte.capitalize()
-                    memoire = charger_memoire()
-                    souvenirs = memoire.get(user_actuel, [])
+                    data_totale = charger_utilisateurs()
+                    souvenirs = data_totale["users"].get(user_actuel, {}).get("history", [])
                     contexte_memoire = " | ".join(souvenirs) if souvenirs else "Aucun souvenir"
 
                     instructions_systeme = (
@@ -423,13 +414,16 @@ else:
         st.rerun()
 
     # ==========================================================================
-    # --- 10. MÉMOIRE À LONG TERME ---
+    # --- 10. MÉMOIRE À LONG TERME (stockée dans database.json -> users.<user>.history) ---
     # ==========================================================================
 
-    memoire = charger_memoire()
-    if user_actuel not in memoire:
-        memoire[user_actuel] = []
-        sauvegarder_memoire(memoire)
+    data_totale = charger_utilisateurs()
+    if user_actuel not in data_totale["users"]:
+        # Ne devrait pas arriver puisqu'on est connecté, mais sécurité par défaut
+        data_totale["users"][user_actuel] = {"code": "", "history": []}
+        sauvegarder_donnees(data_totale)
+
+    data_totale["users"][user_actuel].setdefault("history", [])
 
     st.markdown("<br><hr>", unsafe_allow_html=True)
     st.markdown("### 🧠 Mémoire à long terme de Nairu")
@@ -437,23 +431,24 @@ else:
 
     with c_m_inf:
         st.write("Ce que Nairu sait sur vous :")
-        if not memoire[user_actuel]:
+        historique_utilisateur = data_totale["users"][user_actuel]["history"]
+        if not historique_utilisateur:
             st.info("💡 Rien pour l'instant.")
         else:
-            for i, souvenir in enumerate(memoire[user_actuel]):
+            for i, souvenir in enumerate(historique_utilisateur):
                 ct, cd = st.columns([5, 1])
                 ct.markdown(f"• {souvenir}")
                 if cd.button("🗑️", key=f"dm_{user_actuel}_{i}"):
-                    memoire[user_actuel].pop(i)
-                    sauvegarder_memoire(memoire)
+                    data_totale["users"][user_actuel]["history"].pop(i)
+                    sauvegarder_donnees(data_totale)
                     st.rerun()
 
     with c_m_act:
         with st.form(key=f"fa_{user_actuel}", clear_on_submit=True):
             nouveau_fait = st.text_input("Ajouter un fait à retenir :", placeholder="Ex: J'adore l'automobile")
             if st.form_submit_button("Enregistrer", use_container_width=True) and nouveau_fait.strip() != "":
-                memoire[user_actuel].append(nouveau_fait.strip())
-                sauvegarder_memoire(memoire)
+                data_totale["users"][user_actuel]["history"].append(nouveau_fait.strip())
+                sauvegarder_donnees(data_totale)
                 st.rerun()
 
 # ==============================================================================
