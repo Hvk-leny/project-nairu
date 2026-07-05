@@ -258,9 +258,8 @@ else:
         with st.chat_message("user"): st.write(prompt)
         st.session_state.messages_chat.append({"role": "user", "content": prompt})
         try:
-            try: k_to_use = st.secrets["GROQ_API_KEY"]
-            except: k_to_use = st.session_state.groq_api_key
-            client_groq = Groq(api_key=k_to_use)
+            # 🔥 CORRECTION PRIORITÉ CLÉ : Utilise directement la clé valide par défaut
+            client_groq = Groq(api_key=st.session_state.groq_api_key)
             
             with st.chat_message("assistant"):
                 with st.spinner("Nairu réfléchit..."):
@@ -273,59 +272,4 @@ else:
                     sys_inst = (
                         "Tu es Nairu, assistant IA connecté en direct créé par Leny et Eliott.\n"
                         f"Création le 6 juin 2026. Tu existes depuis : {calculer_age_nairu()}.\n"
-                        f"Tu parles avec {u_cap}. Complice si c'est Leny/Eliott ou un admin.\n"
-                        f"{c_mem}\n\nRecherches web :\n{c_web}\n\nSynthétise bien, reste amical et moderne."
-                    )
-                    h_comp = [{"role": "system", "content": sys_inst}] + st.session_state.messages_chat
-                    rep = client_groq.chat.completions.create(model="llama-3.3-70b-versatile", messages=h_comp)
-                    txt_rep = rep.choices[0].message.content
-                    st.write(txt_rep)
-            st.session_state.messages_chat.append({"role": "assistant", "content": txt_rep})
-            st.rerun()
-        except Exception as e:
-            st.error(f"❌ Erreur Groq : {str(e)}")
-            st.session_state.groq_api_key = ""
-
-    st.markdown("<br><hr>", unsafe_allow_html=True)
-    if st.button("🔴 Déconnexion", use_container_width=True):
-        st.session_state.statut_connexion, st.session_state.user_connecte, st.session_state.messages_chat = "Déconnecté", None, []
-        st.rerun()
-
-# ==============================================================================
-# --- 4.5 EXTENSION : SYSTÈME DE MÉMOIRE LONG TERME ---
-# ==============================================================================
-if st.session_state.statut_connexion == "Connecté":
-    memoire = charger_memoire()
-    if user_actuel not in memoire:
-        memoire[user_actuel] = []
-        sauvegarder_memoire(memoire)
-    st.markdown("<br><hr>", unsafe_allow_html=True)
-    st.markdown("### 🧠 Mémoire à long terme de Nairu")
-    c_m_inf, c_m_act = st.columns([2, 1])
-    
-    with c_m_inf:
-        st.write("Ce que Nairu sait sur vous :")
-        if not memoire[user_actuel]: st.info("💡 Rien pour l'instant.")
-        else:
-            for i, s in enumerate(memoire[user_actuel]):
-                ct, cd = st.columns([5, 1])
-                ct.markdown(f"• {s}")
-                if cd.button("🗑️", key=f"dm_{user_actuel}_{i}"):
-                    memoire[user_actuel].pop(i)
-                    sauvegarder_memoire(memoire)
-                    st.rerun()
-                        
-    with c_m_act:
-        with st.form(key=f"fa_{user_actuel}", clear_on_submit=True):
-            n_s = st.text_input("Ajouter un fait à retenir :", placeholder="Ex: J'adore l'automobile")
-            if st.form_submit_button("Enregistrer", use_container_width=True) and n_s.strip() != "":
-                memoire[user_actuel].append(n_s.strip())
-                sauvegarder_memoire(memoire)
-                st.rerun()
-
-# ==============================================================================
-# --- 5. PIED DE PAGE GLOBAL ---
-# ==============================================================================
-st.markdown("<p style='text-align: center; color: gray; font-size: 14px; margin-top: 50px;'>© 2026 Nairu AI — Tous droits réservés.</p>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: gray; font-size: 15px; margin-top: -30px;'>Créée par Eliott et Leny.</p>", unsafe_allow_html=True)
-st.markdown("<div style='position: fixed; bottom: 30px; right: 40px; color: gray; font-size: 11px; z-index: 99999;'>Version 10.</div>", unsafe_allow_html=True)
+                        f"Tu parles avec {u_cap}. Complice si c'est Leny/Eliott ou un admin.\n
