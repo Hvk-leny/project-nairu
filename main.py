@@ -138,14 +138,3 @@ elif st.session_state.statut_connexion == "Déconnecté":
                         else: st.error("Identifiant ou mot de passe incorrect.")
                             
             with tab_register:
-                st.markdown("### Créer un compte")
-                if st.session_state.mode_maintenance: st.error("❌ Les inscriptions sont fermées.")
-                else:
-                    st.markdown("> *Système anti-spam : Une seule création de compte par IP.*")
-                    with st.form(key="form_inscription"):
-                        nouvel_identifiant = st.text_input("Choisis un identifiant :", key="reg_username")
-                        nouvel_email = st.text_input("Adresse Email :", placeholder="votre@email.com", key="reg_email")
-                        nouveau_code = st.text_input("Choisis un code secret :", type="password", key="reg_password")
-                        if st.form_submit_button("Créer mon compte", use_container_width=True):
-                            data_totale = charger_utilisateurs()
-                            user_ip = recuperer_ip_visiteur()
