@@ -144,4 +144,28 @@ elif st.session_state.statut_connexion == "Déconnecté":
                     st.markdown("> *Système anti-spam : Une seule création de compte par IP.*")
                     with st.form(key="form_inscription"):
                         nouvel_identifiant = st.text_input("Choisis un identifiant :", key="reg_username").strip().lower()
-                        nouvel
+                        nouvel_email = st.text_input("Adresse Email :", placeholder="votre@email.com", key="reg_email")
+                        nouveau_code = st.text_input("Choisis un code secret :", type="password", key="reg_password")
+                        if st.form_submit_button("Créer mon compte", use_container_width=True):
+                            data_totale = charger_utilisateurs()
+                            user_ip = recuperer_ip_visiteur()
+                            if est_ip_bannie(user_ip): st.error("❌ Connexion bannie.")
+                            elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "": st.warning("Champs vides.")
+                            elif nouvel_identifiant in data_totale["comptes"]: st.error("Cet identifiant existe déjà !")
+                            elif ip_deja_utilisee(user_ip): st.error("❌ Un compte a déjà été créé.")
+                            else:
+                                sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code, user_ip)
+                                st.success("🎉 Compte créé ! Connectez-vous.")
+
+        if st.session_state.forcer_formulaire_admin and st.button("⬅️ Retour"):
+            st.session_state.forcer_formulaire_admin = False
+            st.rerun()
+
+# ==============================================================================
+# --- 4. INTERFACE UNE FOIS CONNECTÉ ---
+# ==============================================================================
+else:
+    user_actuel = str(st.session_state.user_connecte).lower().strip()
+    
+    if "openrouter_api_key" not in st.session_state:
+        st.session_state.openrouter_api_key = "sk-or-v1-764bf8f2786df868007
