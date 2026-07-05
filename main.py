@@ -220,4 +220,87 @@ elif st.session_state.statut_connexion == "Déconnecté":
                                 st.success(f"Bienvenue {identifiant} !")
                                 st.rerun()
                         else:
-                            st.error("Identifiant ou mot de
+                            st.error("Identifiant ou mot de passe incorrect.")
+                            
+            with tab_register:
+                st.markdown("### Créer un compte")
+                if st.session_state.mode_maintenance:
+                    st.error("❌ Les inscriptions sont fermées pendant la maintenance du site.")
+                else:
+                    st.markdown("> *Système anti-spam : Une seule création de compte par IP.*")
+                    with st.form(key="form_inscription"):
+                        nouvel_identifiant = st.text_input("Choisis un identifiant :", key="reg_username")
+                        nouvel_email = st.text_input("Adresse Email :", placeholder="votre@email.com", key="reg_email")
+                        nouveau_code = st.text_input("Choisis un code secret :", type="password", key="reg_password")
+                        bouton_inscription = st.form_submit_button("Créer mon compte", use_container_width=True)
+                        
+                        if bouton_inscription:
+                            data_totale = charger_utilisateurs()
+                            with st.spinner("Vérification..."):
+                                user_ip = recuperer_ip_visiteur()
+                            
+                            if est_ip_bannie(user_ip):
+                                st.error("❌ Connexion bannie.")
+                            elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "":
+                                st.warning("Veuillez remplir les champs.")
+                            elif nouvel_identifiant.lower().strip() in data_totale["comptes"]:
+                                st.error("Cet identifiant existe déjà !")
+                            elif ip_deja_utilisee(user_ip):
+                                st.error("❌ Un compte a déjà été créé avec votre connexion internet.")
+                            else:
+                                sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code, user_ip)
+                                st.success("🎉 Compte créé ! Vous pouvez vous connecter.")
+
+        if st.session_state.forcer_formulaire_admin:
+            if st.button("⬅️ Retour à la page de maintenance"):
+                st.session_state.forcer_formulaire_admin = False
+                st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        with st.expander("ℹ️ En savoir plus sur Nairu (Informations)"):
+            st.markdown("### 🚀 À propos de Nairu")
+            st.write("Nous sommes deux Toulousains passionnés de tech, Leny et Eliott...")
+            
+            col_eliott, col_leny = st.columns(2)
+            with col_eliott:
+                st.markdown("**⭐ Eliott**")
+                st.link_button("📸 Instagram d'Eliott", "https://instagram.com/eliott31tls", use_container_width=True)
+            with col_leny:
+                st.markdown("**⚡ Leny**")
+                st.link_button("📸 Instagram de Leny", "https://www.instagram.com/hvk.leny/", use_container_width=True)
+                st.link_button("📺 YouTube de Leny", "https://www.youtube.com/@Hvk_Falkon", use_container_width=True)
+
+# ==============================================================================
+# --- 4. INTERFACE UNE FOIS CONNECTÉ ---
+# ==============================================================================
+else:
+    user_actuel = str(st.session_state.user_connecte).lower().strip()
+    
+    # 🟢 INITIALISATION SÉCURISÉE DE LA VARIABLE DE SESSION
+    if "groq_api_key" not in st.session_state:
+        st.session_state.groq_api_key = "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"
+    
+    # Barre de configuration de secours si la clé sautille ou est vidée
+    if not st.session_state.groq_api_key or st.session_state.groq_api_key == "":
+        st.warning("⚠️ Clé Groq manquante. Merci de la renseigner pour activer le chat :")
+        nouvelle_cle = st.text_input("Colle ta clé Groq (gsk_...) ici :", type="password")
+        if nouvelle_cle:
+            st.session_state.groq_api_key = nouvelle_cle.strip()
+            st.rerun()
+
+    # Activation de la Sidebar pour les deux comptes admins
+    if user_actuel in ["admin_nairu_leny", "admin_nairu_eliott"]:
+        with st.sidebar:
+            st.markdown("### 🛠️ Mode Administrateur")
+            st.info(f"Connecté en tant que : {st.session_state.user_connecte}")
+            
+            st.markdown("---")
+            st.markdown("#### ⚙️ Gestion de la Maintenance")
+            
+            etat_maintenance = st.checkbox("Activer le mode maintenance", value=st.session_state.mode_maintenance)
+            
+            if etat_maintenance != st.session_state.mode_maintenance:
+                data_totale = charger_utilisateurs()
+                data_totale["maintenance"] = etat_maintenance
+                if not etat_maintenance:
+                    data_totale["maintenance_fin"] =
