@@ -11,7 +11,6 @@ import streamlit.components.v1 as components
 # --- 1. CONFIGURATION INTERNE & FONCTIONS DE BASE ---
 # ==============================================================================
 
-# 🔥 INJECTION SÉCURISÉE DANS LE <HEAD> POUR LA VALIDATION GOOGLE
 components.html(
     """<script>
         var meta = parent.document.createElement('meta');
@@ -64,7 +63,7 @@ def sauvegarder_memoire(data):
 def calculer_age_nairu():
     try:
         diff = datetime.datetime.now() - datetime.datetime(2026, 6, 6, 22, 0)
-        return f"{diff.days} jours, {diff.seconds // 3600} heures et {(diff.seconds // 60) % 60} minutes"
+        return f"{diff.days} jours, {diff.seconds // 3600} heures"
     except: return "quelques semaines"
 
 # ==============================================================================
@@ -122,7 +121,7 @@ elif st.session_state.statut_connexion == "Déconnecté":
     col_gauche, col_centre, col_droite = st.columns([1, 2, 1])
     with col_centre:
         with st.container(border=True):
-            if st.session_state.forcer_formulaire_admin: st.warning("⚠️ Mode Maintenance Actif - Accès réservé aux Admins")
+            if st.session_state.forcer_formulaire_admin: st.warning("⚠️ Mode Maintenance Actif")
             tab_login, tab_register = st.tabs(["🔒 Connexion", "✨ Créer un compte"])
             
             with tab_login:
@@ -135,7 +134,7 @@ elif st.session_state.statut_connexion == "Déconnecté":
                         if est_ip_bannie(user_ip): st.error("❌ Accès refusé. IP bannie.")
                         elif identifiant in data_totale["comptes"] and data_totale["comptes"][identifiant]["password"] == code_secret:
                             if st.session_state.mode_maintenance and identifiant not in ["admin_nairu_leny", "admin_nairu_eliott"]:
-                                st.error("🛑 Ce site est en maintenance. Accès restreint.")
+                                st.error("🛑 Ce site est en maintenance.")
                             else:
                                 st.session_state.statut_connexion, st.session_state.user_connecte, st.session_state.forcer_formulaire_admin = "Connecté", identifiant, False
                                 st.rerun()
@@ -143,7 +142,7 @@ elif st.session_state.statut_connexion == "Déconnecté":
                             
             with tab_register:
                 st.markdown("### Créer un compte")
-                if st.session_state.mode_maintenance: st.error("❌ Les inscriptions sont fermées pendant la maintenance.")
+                if st.session_state.mode_maintenance: st.error("❌ Les inscriptions sont fermées.")
                 else:
                     st.markdown("> *Système anti-spam : Une seule création de compte par IP.*")
                     with st.form(key="form_inscription"):
@@ -156,7 +155,7 @@ elif st.session_state.statut_connexion == "Déconnecté":
                             if est_ip_bannie(user_ip): st.error("❌ Connexion bannie.")
                             elif nouvel_identifiant.strip() == "" or nouveau_code.strip() == "": st.warning("Champs vides.")
                             elif nouvel_identifiant.lower().strip() in data_totale["comptes"]: st.error("Cet identifiant existe déjà !")
-                            elif ip_deja_utilisee(user_ip): st.error("❌ Un compte a déjà été créé avec votre connexion.")
+                            elif ip_deja_utilisee(user_ip): st.error("❌ Un compte a déjà été créé.")
                             else:
                                 sauvegarder_utilisateur(nouvel_identifiant, nouvel_email, nouveau_code, user_ip)
                                 st.success("🎉 Compte créé ! Connectez-vous.")
@@ -165,17 +164,6 @@ elif st.session_state.statut_connexion == "Déconnecté":
             st.session_state.forcer_formulaire_admin = False
             st.rerun()
 
-        st.markdown("<br>", unsafe_allow_html=True)
-        with st.expander("ℹ️ En savoir plus sur Nairu"):
-            st.write("Nous sommes deux Toulousains passionnés de tech, Leny et Eliott...")
-            c_el, c_le = st.columns(2)
-            with c_el:
-                st.markdown("**⭐ Eliott**")
-                st.link_button("📸 Instagram d'Eliott", "https://instagram.com/eliott31tls", use_container_width=True)
-            with c_le:
-                st.markdown("**⚡ Leny**")
-                st.link_button("📸 Instagram de Leny", "https://www.instagram.com/hvk.leny/", use_container_width=True)
-
 # ==============================================================================
 # --- 4. INTERFACE UNE FOIS CONNECTÉ ---
 # ==============================================================================
@@ -183,13 +171,6 @@ else:
     user_actuel = str(st.session_state.user_connecte).lower().strip()
     if "groq_api_key" not in st.session_state:
         st.session_state.groq_api_key = "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"
-    
-    if not st.session_state.groq_api_key or st.session_state.groq_api_key == "":
-        st.warning("⚠️ Clé Groq manquante :")
-        nouvelle_cle = st.text_input("Colle ta clé Groq ici :", type="password")
-        if nouvelle_cle:
-            st.session_state.groq_api_key = nouvelle_cle.strip()
-            st.rerun()
 
     if user_actuel in ["admin_nairu_leny", "admin_nairu_eliott"]:
         with st.sidebar:
@@ -208,7 +189,7 @@ else:
                 st.rerun()
                 
             if st.session_state.mode_maintenance:
-                st.warning("⚠️ Le site est invisible pour les utilisateurs.")
+                st.warning("⚠️ Mode maintenance actif.")
                 tm = st.number_input("Durée (minutes) :", min_value=1, max_value=1440, value=30)
                 if st.button("⏱️ Activer le Timer", use_container_width=True):
                     data_totale = charger_utilisateurs()
@@ -224,7 +205,7 @@ else:
                 for nom, infos in list(data_totale["comptes"].items()):
                     if nom not in ["admin_nairu_leny", "admin_nairu_eliott", "leny", "eliott", "exemple"]:
                         st.markdown(f"**Identifiant :** `{nom}`")
-                        st.caption(f"IP : {infos.get('ip','0.0')}|Email : {infos.get('email','N/A')}|MDP : `{infos.get('password','N/A')}`")
+                        st.caption(f"IP: {infos.get('ip','0.0')}|MDP: `{infos.get('password','N/A')}`")
                         c_ban, c_del = st.columns(2)
                         with c_ban:
                             if st.button("🚫 Ban", key=f"b_{nom}", use_container_width=True):
@@ -239,15 +220,6 @@ else:
                                 sauvegarder_donnees(data_totale)
                                 st.rerun()
                         st.markdown("---")
-                
-                st.markdown("#### 🛑 IP Bloquées")
-                for ip in data_totale.get("banned_ips", []):
-                    cx, cb = st.columns([2, 1])
-                    cx.code(ip)
-                    if cb.button("🔓", key=f"u_{ip}", use_container_width=True):
-                        data_totale["banned_ips"].remove(ip)
-                        sauvegarder_donnees(data_totale)
-                        st.rerun()
 
     st.markdown(f"### 🤖 Nairu IA — Session de **{st.session_state.user_connecte}**")
     for msg in st.session_state.messages_chat:
@@ -258,18 +230,65 @@ else:
         with st.chat_message("user"): st.write(prompt)
         st.session_state.messages_chat.append({"role": "user", "content": prompt})
         try:
-            # 🔥 CORRECTION PRIORITÉ CLÉ : Utilise directement la clé valide par défaut
             client_groq = Groq(api_key=st.session_state.groq_api_key)
-            
             with st.chat_message("assistant"):
                 with st.spinner("Nairu réfléchit..."):
                     c_web = executer_recherche_web(prompt)
                     u_cap = st.session_state.user_connecte.capitalize()
                     memoire = charger_memoire()
                     souvenirs = memoire.get(user_actuel, [])
-                    c_mem = "\n- Infos à retenir sur lui :\n" + "\n".join([f"  * {s}" for s in souvenirs]) if souvenirs else ""
+                    c_mem = " | ".join(souvenirs) if souvenirs else "Aucun souvenir"
                     
-                    sys_inst = (
-                        "Tu es Nairu, assistant IA connecté en direct créé par Leny et Eliott.\n"
-                        f"Création le 6 juin 2026. Tu existes depuis : {calculer_age_nairu()}.\n"
-                        f"Tu parles avec {u_cap}. Complice si c'est Leny/Eliott ou un admin.\n
+                    # 🔥 SÉCURISATION MAXIMALE : Tout le prompt système tient sur une seule ligne brute
+                    sys_inst = f"Tu es Nairu, assistant IA créé par Leny et Eliott le 6 juin 2026. Âge : {calculer_age_nairu()}. Tu parles avec {u_cap}. Souvenirs de l'user : {c_mem}. Infos web : {c_web}. Reste amical, synthétique et moderne."
+                    
+                    h_comp = [{"role": "system", "content": sys_inst}] + st.session_state.messages_chat
+                    rep = client_groq.chat.completions.create(model="llama-3.3-70b-versatile", messages=h_comp)
+                    txt_rep = rep.choices[0].message.content
+                    st.write(txt_rep)
+            st.session_state.messages_chat.append({"role": "assistant", "content": txt_rep})
+            st.rerun()
+        except Exception as e:
+            st.error(f"❌ Erreur Groq : {str(e)}")
+
+    st.markdown("<br><hr>", unsafe_allow_html=True)
+    if st.button("🔴 Déconnexion", use_container_width=True):
+        st.session_state.statut_connexion, st.session_state.user_connecte, st.session_state.messages_chat = "Déconnecté", None, []
+        st.rerun()
+
+# ==============================================================================
+# --- 4.5 EXTENSION : SYSTÈME DE MÉMOIRE LONG TERME ---
+# ==============================================================================
+if st.session_state.statut_connexion == "Connecté":
+    memoire = charger_memoire()
+    if user_actuel not in memoire:
+        memoire[user_actuel] = []
+        sauvegarder_memoire(memoire)
+    st.markdown("<br><hr>", unsafe_allow_html=True)
+    st.markdown("### 🧠 Mémoire à long terme de Nairu")
+    c_m_inf, c_m_act = st.columns([2, 1])
+    
+    with c_m_inf:
+        st.write("Ce que Nairu sait sur vous :")
+        if not memoire[user_actuel]: st.info("💡 Rien pour l'instant.")
+        else:
+            for i, s in enumerate(memoire[user_actuel]):
+                ct, cd = st.columns([5, 1])
+                ct.markdown(f"• {s}")
+                if cd.button("🗑️", key=f"dm_{user_actuel}_{i}"):
+                    memoire[user_actuel].pop(i)
+                    sauvegarder_memoire(memoire)
+                    st.rerun()
+                        
+    with c_m_act:
+        with st.form(key=f"fa_{user_actuel}", clear_on_submit=True):
+            n_s = st.text_input("Ajouter un fait à retenir :", placeholder="Ex: J'adore l'automobile")
+            if st.form_submit_button("Enregistrer", use_container_width=True) and n_s.strip() != "":
+                memoire[user_actuel].append(n_s.strip())
+                sauvegarder_memoire(memoire)
+                st.rerun()
+
+# ==============================================================================
+# --- 5. PIED DE PAGE GLOBAL ---
+# ==============================================================================
+st.markdown("<p style='text-align: center; color: gray; font-size: 14px; margin-top: 50px;'>© 2026 Nairu AI — Créée par Eliott et Leny.</p>", unsafe_allow_html=True)
