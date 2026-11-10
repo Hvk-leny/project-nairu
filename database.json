@@ -1,27 +1,27 @@
 {
-    "comptes": {
-        "eliott": {
-            "email": "eliott@nairu.ai",
-            "password": "caca",
-            "ip": "127.0.0.1"
-        },
-        "leny": {
-            "email": "leny@nairu.ai",
-            "password": "ton_mot_de_passe_ici",
-            "ip": "127.0.0.1"
-        },
-        "admin_nairu_eliott": {
-            "email": "admin@nairu.ai",
-            "password": "met_un_code_admin",
-            "ip": "127.0.0.1"
-        },
-        "admin_nairu_leny": {
-            "email": "admin2@nairu.ai",
-            "password": "met_un_code_admin2",
-            "ip": "127.0.0.1"
-        }
+  "comptes": {
+    "eliott": {
+      "email": "eliott@nairu.ai",
+      "password": "caca",
+      "ip": "127.0.0.1"
     },
-    "banned_ips": [],
-    "maintenance": false,
-    "maintenance_fin": ""
+    "leny": {
+      "email": "leny@nairu.ai",
+      "password": "ton_mot_de_passe_ici",
+      "ip": "127.0.0.1"
+    },
+    "admin_nairu_eliott": {
+      "email": "admin@nairu.ai",
+      "password": "met_un_code_admin",
+      "ip": "127.0.0.1"
+    },
+    "admin_nairu_leny": {
+      "email": "admin2@nairu.ai",
+      "password": "met_un_code_admin2",
+      "ip": "127.0.0.1"
+    }
+  },
+  "banned_ips": [],
+  "maintenance": false,
+  "maintenance_fin": ""
 }
