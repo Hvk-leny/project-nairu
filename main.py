@@ -18,9 +18,8 @@ client = OpenAI(
 )
 
 # ==============================================================================
-# --- 1. FONCTIONS DE BASE & CONFIGURATION INTERNE ---
+# --- 1. CONFIGURATION INTERNE & BALISE META ---
 # ==============================================================================
-
 components.html(
     """<script>
         var meta = parent.document.createElement('meta');
@@ -38,7 +37,7 @@ def calculer_age_nairu():
         return "quelques semaines"
 
 # ==============================================================================
-# --- 2. MISE EN PAGE & GESTION DU THÈME ---
+# --- 2. CONFIGURATION DE LA PAGE & STYLES ---
 # ==============================================================================
 st.set_page_config(
     page_title="NAIRU - AI", 
@@ -51,31 +50,4 @@ st.markdown(
     """<style>
     [data-testid="stExpander"] [data-testid="stIconMaterial"] { font-size: 0px !important; color: transparent !important; display: none !important; }
     [data-testid="stExpander"] summary { position: relative !important; }
-    [data-testid="stExpander"] summary::after { content: '➔' !important; font-size: 14px !important; color: #00f0ff !important; position: absolute !important; right: 15px !important; }
-    </style>""", 
-    unsafe_allow_html=True
-)
-
-if "messages_chat" not in st.session_state:
-    st.session_state.messages_chat = []
-
-# ==============================================================================
-# --- 3. BARRE LATÉRALE ---
-# ==============================================================================
-with st.sidebar:
-    st.title("NAIRU AI")
-    st.caption(f"⏱️ Actif depuis : {calculer_age_nairu()}")
-    st.divider()
-    
-    if st.button("🗑️ Effacer la conversation", use_container_width=True):
-        st.session_state.messages_chat = []
-        st.rerun()
-
-# ==============================================================================
-# --- 4. INTERFACE DE DISCUSSION PRINCIPALE ---
-# ==============================================================================
-st.title("Discussion avec NAIRU")
-
-# Affichage de l'historique des échanges
-for message in st.session_state.messages_chat:
-    with st
+    [data-testid="stExpander"] summary::
